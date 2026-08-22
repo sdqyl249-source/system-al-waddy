@@ -181,11 +181,11 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
 <div id="teachersConfigModal" class="modal-overlay">
     <div class="modal-content" style="width: 720px;">
         <h3 style="font-weight: 800; margin-top:0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">⚙️ صندوق إعداد وقواعد المعلمين للذكاء الاصطناعي</h3>
-        
+
         <div style="background-color: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px;">
             <h4 style="margin-top: 0; margin-bottom: 10px; color: var(--accent-color);">إضافة / تعديل معلم:</h4>
             <input type="hidden" id="editTeacherIndex" value="-1">
-            
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                 <div>
                     <label style="font-size: 13px; font-weight: 700;">اختر اسم المعلم (اختياري):</label>
@@ -393,15 +393,15 @@ function generateAISchedule() {
 
     if (currentView === 'lessons') {
         lessonsData = createEmptyLessonsStructure();
-        
+
         weekDays.forEach(day => {
             for (let slot = 1; slot <= 6; slot++) {
                 let assignedTeachersInSlot = new Set();
-                
+
                 classes.forEach(cls => {
                     let availSubjects = isPrimaryClass(cls) ? [...primarySubjects] : [...upperSubjects];
                     let chosenSubject = availSubjects[Math.floor(Math.random() * availSubjects.length)];
-                    
+
                     let matchingTeacher = TEACHER_RULES.find(t => 
                         t.name && 
                         t.subjects.includes(chosenSubject) && 
@@ -429,13 +429,13 @@ function generateAISchedule() {
 
         weekDays.forEach(day => {
             let assignedInDay = new Set();
-            
+
             patrolZones.forEach(zone => {
                 let candidates = teacherNames.filter(t => !assignedInDay.has(t));
                 if (candidates.length === 0) candidates = [...teacherNames];
 
                 candidates.sort(() => Math.random() - 0.5);
-                
+
                 let selected = [];
                 if (candidates.length > 0) {
                     let t1 = candidates.pop();
@@ -447,12 +447,12 @@ function generateAISchedule() {
                     selected.push(t2);
                     assignedInDay.add(t2);
                 }
-                
+
                 patrolData[day][zone] = { teachers: selected };
             });
         });
     }
-    
+
     saveData();
     renderVerticalSchedule();
     alert("🤖 تم التوليد بنجاح!");
@@ -539,17 +539,17 @@ function renderLessonsView(container) {
         card.className = "class-section-card";
         card.setAttribute("data-class", cls);
         card.innerHTML = `<div class="class-header"><span>🏫 ${cls}</span><small style="opacity: 0.85;">جدول الحصص الأسبوعي</small></div>`;
-        
+
         let table = document.createElement("table");
         table.className = "vertical-table";
-        table.innerHTML = "<thead><tr><th class=\"day-title-col\">اليوم</th><th>الدرس 1</th><th>الدرس 2</th><th>الدرس 3</th><th>الدرس 4</th><th>الدرس 5</th><th>الدرس 6</th></tr></thead>";
-        
+        table.innerHTML = "<thead><tr><th class="day-title-col">اليوم</th><th>الدرس 1</th><th>الدرس 2</th><th>الدرس 3</th><th>الدرس 4</th><th>الدرس 5</th><th>الدرس 6</th></tr></thead>";
+
         let tbody = document.createElement("tbody");
         weekDays.forEach(day => {
             let tr = document.createElement("tr");
             tr.innerHTML = `<td class="day-title-col">${day}</td>`;
             for (let slot = 1; slot <= 6; slot++) {
-                let cell = lessonsData[day][cls][slot];
+                let cell = lessonsData[day][cls][slot] || { subject: "-", teacher: "" };
                 let dis = isAdmin ? "" : "cell-disabled";
                 tr.innerHTML += `<td class="cell-slot ${dis}" data-day="${day}" data-class="${cls}" data-slot="${slot}" onclick="openCellModal('${day}', '${cls}', ${slot})">
                     <div class="subject-title">${cell.subject}</div>
@@ -567,23 +567,25 @@ function renderLessonsView(container) {
 function renderPatrolView(container) {
     let card = document.createElement("div");
     card.className = "class-section-card patrol-card";
-    card.innerHTML = `<div class="class-header"><span>🛡️ جدول مراقبة الساحة والممرات الميداني</span><small style="opacity: 0.85;">مراقبة كافة القواطع بالكامل</small></div>`;
-    
+    card.innerHTML = `<div class="class-header"><span>🛡️ جدول المراقبة الميدانية والساحة العامة</span><small style="opacity: 0.85;">توزيع المراقبين اليومي</small></div>`;
+
     let table = document.createElement("table");
     table.className = "vertical-table";
-    let zHeaders = patrolZones.map(z => `<th>${z}</th>`).join("");
-    table.innerHTML = `<thead><tr><th class="day-title-col">اليوم</th>${zHeaders}</tr></thead>`;
-    
+    let headerHTML = "<thead><tr><th class=\"day-title-col\">اليوم / القاطع</th>";
+    patrolZones.forEach(zone => { headerHTML += `<th>${zone}</th>`; });
+    headerHTML += "</tr></thead>";
+    table.innerHTML = headerHTML;
+
     let tbody = document.createElement("tbody");
     weekDays.forEach(day => {
         let tr = document.createElement("tr");
         tr.innerHTML = `<td class="day-title-col">${day}</td>`;
         patrolZones.forEach(zone => {
-            let tList = (patrolData[day] && patrolData[day][zone]) ? patrolData[day][zone].teachers || [] : [];
+            let cell = (patrolData[day] && patrolData[day][zone]) ? patrolData[day][zone] : { teachers: [] };
+            let tList = cell.teachers && cell.teachers.length > 0 ? cell.teachers.join(" | ") : "غير مخصص";
             let dis = isAdmin ? "" : "cell-disabled";
-            let names = tList.length > 0 ? tList.join(" + ") : '<span style="color:#94a3b8;">- غير محدد -</span>';
-            tr.innerHTML += `<td class="cell-slot ${dis}" data-day="${day}" data-zone="${zone}" onclick="openPatrolModal('${day}', '${zone}')">
-                <div class="teacher-name">${names}</div>
+            tr.innerHTML += `<td class="cell-slot ${dis}" onclick="openPatrolModal('${day}', '${zone}')">
+                <div class="teacher-name">${tList}</div>
             </td>`;
         });
         tbody.appendChild(tr);
@@ -593,6 +595,82 @@ function renderPatrolView(container) {
     container.appendChild(card);
 }
 
+function checkConflicts() {
+    const banner = document.getElementById("conflictBanner");
+    const conflictList = document.getElementById("conflictList");
+    conflictList.innerHTML = "";
+    let conflictsFound = [];
+
+    // Remove old conflict classes
+    document.querySelectorAll(".cell-conflict").forEach(el => el.classList.remove("cell-conflict"));
+
+    if (currentView === 'lessons') {
+        weekDays.forEach(day => {
+            for (let slot = 1; slot <= 6; slot++) {
+                let teacherMap = {};
+                classes.forEach(cls => {
+                    let cell = lessonsData[day][cls][slot];
+                    if (cell && cell.teacher && cell.teacher.trim() !== "") {
+                        if (!teacherMap[cell.teacher]) teacherMap[cell.teacher] = [];
+                        teacherMap[cell.teacher].push(cls);
+                    }
+                });
+
+                for (let t in teacherMap) {
+                    if (teacherMap[t].length > 1) {
+                        conflictsFound.push(`⚠️ المعلم (<b>${t}</b>) لديه تضارب يوم <b>${day}</b> - الدرس <b>${slot}</b> في الصفوف: ${teacherMap[t].join(" و ")}`);
+                        // Highlight cells
+                        teacherMap[t].forEach(cls => {
+                            let el = document.querySelector(`td[data-day="${day}"][data-class="${cls}"][data-slot="${slot}"]`);
+                            if (el) el.classList.add("cell-conflict");
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+    if (conflictsFound.length > 0) {
+        banner.style.display = "block";
+        conflictList.innerHTML = conflictsFound.join("<br>");
+    } else {
+        banner.style.display = "none";
+    }
+}
+
+function resolveConflicts() {
+    if (!isAdmin) return;
+    let resolvedCount = 0;
+    if (currentView === 'lessons') {
+        weekDays.forEach(day => {
+            for (let slot = 1; slot <= 6; slot++) {
+                let teacherMap = {};
+                classes.forEach(cls => {
+                    let cell = lessonsData[day][cls][slot];
+                    if (cell && cell.teacher && cell.teacher.trim() !== "") {
+                        if (!teacherMap[cell.teacher]) teacherMap[cell.teacher] = [];
+                        teacherMap[cell.teacher].push(cls);
+                    }
+                });
+
+                for (let t in teacherMap) {
+                    if (teacherMap[t].length > 1) {
+                        // Keep first assignment, clear others
+                        for (let i = 1; i < teacherMap[t].length; i++) {
+                            let clsToClear = teacherMap[t][i];
+                            lessonsData[day][clsToClear][slot].teacher = "";
+                            resolvedCount++;
+                        }
+                    }
+                }
+            }
+        });
+    }
+    saveData();
+    renderVerticalSchedule();
+    alert(`✨ تم إصلاح ${resolvedCount} حالة تضارب بنجاح!`);
+}
+
 function openCellModal(day, cls, slot) {
     if (!isAdmin) return;
     activeCellInfo = { type: 'lesson', day, cls, slot };
@@ -600,18 +678,28 @@ function openCellModal(day, cls, slot) {
     document.getElementById("lessonFormGroup").style.display = "block";
     document.getElementById("patrolFormGroup").style.display = "none";
 
-    let subSelect = document.getElementById("subjectSelect");
-    subSelect.innerHTML = isPrimaryClass(cls) 
-        ? primarySubjects.map(s => `<option value="${s}">${s}</option>`).join("") 
-        : upperSubjects.map(s => `<option value="${s}">${s}</option>`).join("");
+    let cell = lessonsData[day][cls][slot] || { subject: "-", teacher: "" };
 
-    let teachSelect = document.getElementById("teacherSelect");
-    let teacherNames = getTeachersList();
-    teachSelect.innerHTML = `<option value="">-- بدون معلم --</option>` + teacherNames.map(t => `<option value="${t}">${t}</option>`).join("");
+    // Fill subjects
+    let subSel = document.getElementById("subjectSelect");
+    let availSubs = isPrimaryClass(cls) ? primarySubjects : upperSubjects;
+    subSel.innerHTML = '<option value="-">- فارغ -</option>';
+    availSubs.forEach(s => {
+        let opt = document.createElement("option");
+        opt.value = s; opt.innerText = s;
+        if (s === cell.subject) opt.selected = true;
+        subSel.appendChild(opt);
+    });
 
-    let current = lessonsData[day][cls][slot];
-    subSelect.value = current.subject || "-";
-    teachSelect.value = current.teacher || "";
+    // Fill teachers
+    let tSel = document.getElementById("teacherSelect");
+    tSel.innerHTML = '<option value="">- لا يوجد معلم -</option>';
+    getTeachersList().forEach(t => {
+        let opt = document.createElement("option");
+        opt.value = t; opt.innerText = t;
+        if (t === cell.teacher) opt.selected = true;
+        tSel.appendChild(opt);
+    });
 
     document.getElementById("cellModal").style.display = "flex";
 }
@@ -619,21 +707,29 @@ function openCellModal(day, cls, slot) {
 function openPatrolModal(day, zone) {
     if (!isAdmin) return;
     activeCellInfo = { type: 'patrol', day, zone };
-    document.getElementById("modalTitle").innerText = `تعديل مراقبة: ${zone} - ${day}`;
+    document.getElementById("modalTitle").innerText = `تعديل المراقبين: ${zone} - ${day}`;
     document.getElementById("lessonFormGroup").style.display = "none";
     document.getElementById("patrolFormGroup").style.display = "block";
 
-    let teacherNames = getTeachersList();
-    let options = `<option value="">-- لا يوجد --</option>` + teacherNames.map(t => `<option value="${t}">${t}</option>`).join("");
+    let cell = (patrolData[day] && patrolData[day][zone]) ? patrolData[day][zone] : { teachers: [] };
+    let t1 = cell.teachers[0] || "";
+    let t2 = cell.teachers[1] || "";
 
-    let t1Sel = document.getElementById("patrolTeacher1Select");
-    let t2Sel = document.getElementById("patrolTeacher2Select");
-    t1Sel.innerHTML = options;
-    t2Sel.innerHTML = options;
+    let p1 = document.getElementById("patrolTeacher1Select");
+    let p2 = document.getElementById("patrolTeacher2Select");
 
-    let currentList = (patrolData[day] && patrolData[day][zone]) ? patrolData[day][zone].teachers || [] : [];
-    t1Sel.value = currentList[0] || "";
-    t2Sel.value = currentList[1] || "";
+    p1.innerHTML = '<option value="">- لا يوجد -</option>';
+    p2.innerHTML = '<option value="">- لا يوجد -</option>';
+
+    getTeachersList().forEach(t => {
+        let opt1 = document.createElement("option"); opt1.value = t; opt1.innerText = t;
+        if (t === t1) opt1.selected = true;
+        p1.appendChild(opt1);
+
+        let opt2 = document.createElement("option"); opt2.value = t; opt2.innerText = t;
+        if (t === t2) opt2.selected = true;
+        p2.appendChild(opt2);
+    });
 
     document.getElementById("cellModal").style.display = "flex";
 }
@@ -645,236 +741,159 @@ function closeModal() {
 
 function applyCellEdit() {
     if (!activeCellInfo) return;
-
     if (activeCellInfo.type === 'lesson') {
+        let { day, cls, slot } = activeCellInfo;
         let sub = document.getElementById("subjectSelect").value;
-        let teach = document.getElementById("teacherSelect").value;
-        lessonsData[activeCellInfo.day][activeCellInfo.cls][activeCellInfo.slot] = { subject: sub, teacher: teach };
+        let t = document.getElementById("teacherSelect").value;
+        lessonsData[day][cls][slot] = { subject: sub, teacher: t };
     } else {
+        let { day, zone } = activeCellInfo;
         let t1 = document.getElementById("patrolTeacher1Select").value;
         let t2 = document.getElementById("patrolTeacher2Select").value;
         let list = [];
         if (t1) list.push(t1);
-        if (t2 && t2 !== t1) list.push(t2);
-        
-        if (!patrolData[activeCellInfo.day]) patrolData[activeCellInfo.day] = {};
-        patrolData[activeCellInfo.day][activeCellInfo.zone] = { teachers: list };
+        if (t2) list.push(t2);
+        if (!patrolData[day]) patrolData[day] = {};
+        patrolData[day][zone] = { teachers: list };
     }
-
     saveData();
     closeModal();
     renderVerticalSchedule();
 }
 
-function checkConflicts() {
-    let conflicts = [];
-    document.querySelectorAll(".cell-conflict").forEach(el => el.classList.remove("cell-conflict"));
-
-    if (currentView === 'lessons') {
-        weekDays.forEach(day => {
-            for (let slot = 1; slot <= 6; slot++) {
-                let teacherMap = {};
-                classes.forEach(cls => {
-                    let cell = lessonsData[day][cls][slot];
-                    if (cell.teacher && cell.teacher.trim() !== "") {
-                        if (!teacherMap[cell.teacher]) teacherMap[cell.teacher] = [];
-                        teacherMap[cell.teacher].push(cls);
-                    }
-                });
-
-                for (let teacher in teacherMap) {
-                    if (teacherMap[teacher].length > 1) {
-                        conflicts.push(`المعلم <strong>${teacher}</strong> معين في أكثر من صف بنفس الوقت (يوم ${day} - الدرس ${slot}): [${teacherMap[teacher].join(" ، ")}]`);
-                        teacherMap[teacher].forEach(cls => {
-                            let cellTd = document.querySelector(`td[data-day="${day}"][data-class="${cls}"][data-slot="${slot}"]`);
-                            if (cellTd) cellTd.classList.add("cell-conflict");
-                        });
-                    }
-                }
-            }
-        });
-    }
-
-    const panel = document.getElementById("conflictBanner");
-    const listDiv = document.getElementById("conflictList");
-
-    if (conflicts.length > 0) {
-        listDiv.innerHTML = conflicts.map(c => `• ${c}`).join("<br>");
-        panel.style.display = "block";
-    } else {
-        panel.style.display = "none";
-    }
-}
-
-function resolveConflicts() {
-    if (!isAdmin) return;
-    let resolvedCount = 0;
-
-    weekDays.forEach(day => {
-        for (let slot = 1; slot <= 6; slot++) {
-            let assignedInSlot = new Set();
-            classes.forEach(cls => {
-                let cell = lessonsData[day][cls][slot];
-                if (cell.teacher && cell.teacher.trim() !== "") {
-                    if (assignedInSlot.has(cell.teacher)) {
-                        lessonsData[day][cls][slot].teacher = "";
-                        resolvedCount++;
-                    } else {
-                        assignedInSlot.add(cell.teacher);
-                    }
-                }
-            });
-        }
-    });
-
-    saveData();
-    renderVerticalSchedule();
-    alert(`✨ تم إصلاح التضاربات بنجاح وإزالة ${resolvedCount} تعارض في التوقيت!`);
-}
-
-function resetAllData() {
-    if (!isAdmin) return;
-    if (confirm("هل أنت تأكد من إعادة ضبط كل البيانات والعودة للوضع الإفتراضي؟")) {
-        localStorage.removeItem(STORAGE_LESSONS);
-        localStorage.removeItem(STORAGE_PATROL);
-        localStorage.removeItem(STORAGE_RULES);
-        loadOrCreateData();
-        renderVerticalSchedule();
-        alert("تمت إعادة الضبط بنجاح!");
-    }
-}
-
-/* إدارة المعلمين والقواعد */
 function openTeachersConfigModal() {
     if (!isAdmin) return;
-    populateTeacherRulesModal();
+    renderTeacherRulesTable();
+    populateTeacherSelectOptions();
+    renderSubjectChips();
+    renderClassCheckboxes();
     document.getElementById("teachersConfigModal").style.display = "flex";
 }
 
 function closeTeachersConfigModal() {
     document.getElementById("teachersConfigModal").style.display = "none";
+    clearTeacherForm();
 }
 
-function populateTeacherRulesModal() {
-    let nameSelect = document.getElementById("selectTeacherName");
-    nameSelect.innerHTML = `<option value="">-- اختر من القائمة أو أضف جديد --</option>` + 
-        teachers.map(t => `<option value="${t}">${t}</option>`).join("") + 
-        `<option value="__CUSTOM__">+ إضافة معلم جديد غير موجود بالقائمة</option>`;
-
-    let subContainer = document.getElementById("subjectsContainer");
-    subContainer.innerHTML = allSubjects.map(s => `
-        <div class="chip-item" onclick="toggleSubjectChip(this)" data-value="${s}">
-            <span>${s}</span>
-        </div>
-    `).join("");
-
-    let classBox = document.getElementById("classCheckboxContainer");
-    classBox.innerHTML = classes.map(c => `<label class="checkbox-item"><input type="checkbox" value="${c}"> ${c}</label>`).join("");
-
-    renderRulesTable();
-}
-
-function toggleSubjectChip(chip) {
-    chip.classList.toggle("active");
+function populateTeacherSelectOptions() {
+    let sel = document.getElementById("selectTeacherName");
+    sel.innerHTML = '<option value="">-- اختر من قائمة الأسماء الافتراضية --</option>';
+    teachers.forEach(t => {
+        sel.innerHTML += `<option value="${t}">${t}</option>`;
+    });
+    sel.innerHTML += '<option value="__custom__">+ إضافة معلم جديد باسم مخصص</option>';
 }
 
 function toggleCustomTeacherInput(val) {
     let customInput = document.getElementById("inputCustomTeacherName");
-    if (val === "__CUSTOM__") {
+    if (val === '__custom__') {
         customInput.style.display = "block";
     } else {
         customInput.style.display = "none";
     }
 }
 
-function renderRulesTable() {
-    let tbody = document.getElementById("teacherRulesTableBody");
-    document.getElementById("teacherRulesCount").innerText = TEACHER_RULES.length;
-    tbody.innerHTML = "";
+function renderSubjectChips(selectedSubjects = []) {
+    let container = document.getElementById("subjectsContainer");
+    container.innerHTML = "";
+    allSubjects.forEach(s => {
+        let isActive = selectedSubjects.includes(s) ? "active" : "";
+        let chip = document.createElement("div");
+        chip.className = `chip-item ${isActive}`;
+        chip.innerText = s;
+        chip.onclick = function() {
+            this.classList.toggle("active");
+        };
+        container.appendChild(chip);
+    });
+}
 
-    TEACHER_RULES.forEach((rule, idx) => {
-        let subs = rule.subjects.length > 0 ? rule.subjects.join(", ") : "-";
-        let cls = rule.classes.length > 0 ? rule.classes.join(", ") : "-";
-        tbody.innerHTML += `<tr>
-            <td><strong>${rule.name}</strong></td>
-            <td>${subs}</td>
-            <td>${cls}</td>
-            <td>${rule.maxQuota || 16}</td>
-            <td>
-                <button class="btn btn-fix" style="padding: 3px 8px; font-size: 11px;" onclick="editRule(${idx})">تعديل</button>
-                <button class="btn btn-danger" style="padding: 3px 8px; font-size: 11px;" onclick="deleteRule(${idx})">حذف</button>
-            </td>
-        </tr>`;
+function renderClassCheckboxes(selectedClasses = []) {
+    let container = document.getElementById("classCheckboxContainer");
+    container.innerHTML = "";
+    classes.forEach(c => {
+        let isChecked = selectedClasses.includes(c) ? "checked" : "";
+        let item = document.createElement("label");
+        item.className = "checkbox-item";
+        item.innerHTML = `<input type="checkbox" value="${c}" ${isChecked}> ${c}`;
+        container.appendChild(item);
     });
 }
 
 function saveTeacherRule() {
-    let selectVal = document.getElementById("selectTeacherName").value;
-    let customVal = document.getElementById("inputCustomTeacherName").value;
-    let name = (selectVal === "__CUSTOM__") ? customVal.trim() : selectVal;
+    let editIndex = parseInt(document.getElementById("editTeacherIndex").value);
+    let selName = document.getElementById("selectTeacherName").value;
+    let customName = document.getElementById("inputCustomTeacherName").value.trim();
+    let name = selName === '__custom__' ? customName : selName;
 
-    if (!name) { alert("الرجاء اختيار أو كتابة اسم المعلم!"); return; }
+    if (!name) {
+        alert("يرجى اختيار أو كتابة اسم المعلم!");
+        return;
+    }
 
     let quota = parseInt(document.getElementById("inputTeacherQuota").value) || 16;
-    
-    let activeChips = document.querySelectorAll("#subjectsContainer .chip-item.active");
-    let selectedSubs = Array.from(activeChips).map(chip => chip.getAttribute("data-value"));
 
-    let classCheckboxes = document.querySelectorAll("#classCheckboxContainer input[type='checkbox']:checked");
-    let selectedClasses = Array.from(classCheckboxes).map(cb => cb.value);
+    let selectedSubs = [];
+    document.querySelectorAll("#subjectsContainer .chip-item.active").forEach(el => {
+        selectedSubs.push(el.innerText);
+    });
 
-    let editIdx = parseInt(document.getElementById("editTeacherIndex").value);
+    let selectedCls = [];
+    document.querySelectorAll("#classCheckboxContainer input:checked").forEach(el => {
+        selectedCls.push(el.value);
+    });
 
-    let ruleObj = { name, subjects: selectedSubs, classes: selectedClasses, maxQuota: quota };
+    let ruleData = {
+        name: name,
+        subjects: selectedSubs,
+        classes: selectedCls,
+        maxQuota: quota
+    };
 
-    if (editIdx >= 0) {
-        TEACHER_RULES[editIdx] = ruleObj;
+    if (editIndex >= 0) {
+        TEACHER_RULES[editIndex] = ruleData;
     } else {
-        TEACHER_RULES.push(ruleObj);
+        // Check duplicate
+        let existingIdx = TEACHER_RULES.findIndex(r => r.name === name);
+        if (existingIdx >= 0) {
+            TEACHER_RULES[existingIdx] = ruleData;
+        } else {
+            TEACHER_RULES.push(ruleData);
+        }
     }
 
     saveData();
+    renderTeacherRulesTable();
     clearTeacherForm();
-    renderRulesTable();
-    renderVerticalSchedule();
+    alert("💾 تم حفظ بيانات وقواعد المعلم بنجاح!");
 }
 
-function editRule(idx) {
-    let rule = TEACHER_RULES[idx];
-    document.getElementById("editTeacherIndex").value = idx;
-    
-    let nameSelect = document.getElementById("selectTeacherName");
+function editTeacherRule(index) {
+    let rule = TEACHER_RULES[index];
+    if (!rule) return;
+
+    document.getElementById("editTeacherIndex").value = index;
+    let selName = document.getElementById("selectTeacherName");
+
     if (teachers.includes(rule.name)) {
-        nameSelect.value = rule.name;
+        selName.value = rule.name;
         toggleCustomTeacherInput(rule.name);
     } else {
-        nameSelect.value = "__CUSTOM__";
-        toggleCustomTeacherInput("__CUSTOM__");
+        selName.value = "__custom__";
+        toggleCustomTeacherInput("__custom__");
         document.getElementById("inputCustomTeacherName").value = rule.name;
     }
 
     document.getElementById("inputTeacherQuota").value = rule.maxQuota || 16;
-
-    let chips = document.querySelectorAll("#subjectsContainer .chip-item");
-    chips.forEach(chip => {
-        let val = chip.getAttribute("data-value");
-        if (rule.subjects.includes(val)) {
-            chip.classList.add("active");
-        } else {
-            chip.classList.remove("active");
-        }
-    });
-
-    let classCheckboxes = document.querySelectorAll("#classCheckboxContainer input[type='checkbox']");
-    classCheckboxes.forEach(cb => { cb.checked = rule.classes.includes(cb.value); });
+    renderSubjectChips(rule.subjects || []);
+    renderClassCheckboxes(rule.classes || []);
 }
 
-function deleteRule(idx) {
-    if (confirm("هل أنت تأكد من حذف هذا المعلم من القواعد؟")) {
-        TEACHER_RULES.splice(idx, 1);
+function deleteTeacherRule(index) {
+    if (confirm("هل أنت أصلًا متأكد من حذف هذا المعلم وقواعده من النظام؟")) {
+        TEACHER_RULES.splice(index, 1);
         saveData();
-        renderRulesTable();
-        renderVerticalSchedule();
+        renderTeacherRulesTable();
     }
 }
 
@@ -884,16 +903,45 @@ function clearTeacherForm() {
     document.getElementById("inputCustomTeacherName").value = "";
     document.getElementById("inputCustomTeacherName").style.display = "none";
     document.getElementById("inputTeacherQuota").value = "16";
-    
-    let chips = document.querySelectorAll("#subjectsContainer .chip-item");
-    chips.forEach(chip => chip.classList.remove("active"));
-
-    let classCheckboxes = document.querySelectorAll("#classCheckboxContainer input[type='checkbox']");
-    classCheckboxes.forEach(cb => { cb.checked = false; });
+    renderSubjectChips([]);
+    renderClassCheckboxes([]);
 }
 
-// البدء عند تحميل الصفحة
-window.onload = () => {
+function renderTeacherRulesTable() {
+    let tbody = document.getElementById("teacherRulesTableBody");
+    document.getElementById("teacherRulesCount").innerText = TEACHER_RULES.length;
+    tbody.innerHTML = "";
+
+    TEACHER_RULES.forEach((rule, idx) => {
+        let subs = rule.subjects.length > 0 ? rule.subjects.join("، ") : "-";
+        let cls = rule.classes.length > 0 ? rule.classes.join("، ") : "-";
+        tbody.innerHTML += `<tr>
+            <td><strong>${rule.name}</strong></td>
+            <td><small>${subs}</small></td>
+            <td><small>${cls}</small></td>
+            <td><b>${rule.maxQuota || 16}</b></td>
+            <td>
+                <button class="btn btn-fix" style="padding: 3px 8px; font-size: 11px;" onclick="editTeacherRule(${idx})">تعديل</button>
+                <button class="btn btn-danger" style="padding: 3px 8px; font-size: 11px;" onclick="deleteTeacherRule(${idx})">حذف</button>
+            </td>
+        </tr>`;
+    });
+}
+
+function resetAllData() {
+    if (!isAdmin) return;
+    if (confirm("⚠️ هل أنت متأكد من إعادة ضبط كافة البيانات إلى الحالة الافتراضية؟")) {
+        localStorage.removeItem(STORAGE_LESSONS);
+        localStorage.removeItem(STORAGE_PATROL);
+        localStorage.removeItem(STORAGE_RULES);
+        loadOrCreateData();
+        renderVerticalSchedule();
+        alert("🔄 تم إعادة ضبط البيانات بنجاح!");
+    }
+}
+
+// Initialize on page load
+window.onload = function() {
     loadOrCreateData();
     updateUIState();
 };
