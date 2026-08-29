@@ -83,6 +83,7 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 .day-title-col { font-weight: 900; font-size: 15px; width: 110px; }
 .subject-title { font-weight: 800; font-size: 14px; margin-bottom: 2px; }
 .teacher-name { font-weight: 700; font-size: 13px; }
+.quota-badge { display: block; font-size: 11px; background: #dbeafe; color: #1e40af; padding: 2px 6px; border-radius: 10px; margin-top: 3px; font-weight: 800; }
 td.cell-slot { cursor: pointer; transition: filter 0.2s ease; }
 td.cell-slot:hover { filter: brightness(0.9) !important; }
 td.cell-disabled { cursor: not-allowed !important; opacity: 0.85; }
@@ -96,7 +97,7 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
 .chip-item.active { background: var(--accent-color); color: white; border-color: var(--accent-color); box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25); }
 .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; max-height: 120px; overflow-y: auto; border: 1px solid #e2e8f0; padding: 8px; border-radius: 6px; }
 .checkbox-item { font-size: 12.5px; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 4px; }
-@media print { .app-bar, .navigation-tabs, .btn-group, .btn-auth { display: none !important; } body { padding: 0; background: white; } .class-section-card, .report-card { page-break-inside: avoid; margin-bottom: 15px; } .vertical-table th, .day-title-col, td.cell-slot { -webkit-print-color-adjust: exact; } }
+@media print { .app-bar, .navigation-tabs, .btn-group, .btn-auth, .quota-badge { display: none !important; } body { padding: 0; background: white; } .class-section-card, .report-card { page-break-inside: avoid; margin-bottom: 15px; } .vertical-table th, .day-title-col, td.cell-slot { -webkit-print-color-adjust: exact; } }
 </style>
 </head>
 <body>
@@ -109,7 +110,7 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
     </div>
     <div class="btn-group">
         <button class="btn btn-manage admin-only" onclick="openTeachersConfigModal()">👨‍🏫 إدارة بيانات وقواعد المعلمين</button>
-        <button class="btn btn-ai admin-only" onclick="generateAISchedule()">🤖 توليد ذكي حسب القواعد</button>
+        <button class="btn btn-ai admin-only" onclick="openAiQuestionnaire()">🤖 توليد ذكي حسب القواعد</button>
         <button class="btn btn-fix admin-only" onclick="resolveConflicts()">✨ إصلاح التضارب</button>
         <button class="btn btn-notify admin-only" onclick="sendGlobalNotification()">🔔 إرسال الإشعارات للكل</button>
         <button class="btn btn-print" onclick="window.print()">🖨️ طباعة الجدول</button>
@@ -142,6 +143,23 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
 </div>
 
 <div id="scheduleContainer" class="vertical-container"></div>
+
+<!-- مودال استبيان التوليد الذكي قبل التعديل -->
+<div id="aiQuestionnaireModal" class="modal-overlay">
+    <div class="modal-content" style="width: 600px;">
+        <h3 style="font-weight: 800; margin-top:0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">🤖 استبيان الذكاء الاصطناعي لتوزيع الجدول</h3>
+        <p style="font-size: 13.5px; color: #475569;">يرجى التحقق وتحديد ما يدرسه كل معلم وصفوفه والنصاب المقرر قبل البدء بعملية التوليد:</p>
+        
+        <div id="questionnaireStepsContainer" style="max-height: 350px; overflow-y: auto; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; background: #f8fafc; margin-bottom: 15px;">
+            <!-- يتم تعبئة الأسئلة تلقائياً -->
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button class="btn btn-save" onclick="executeAiGenerationFromSurvey()">⚡ بدء التوليد الذكي الآن</button>
+            <button class="btn btn-danger" onclick="closeAiQuestionnaire()">إلغاء</button>
+        </div>
+    </div>
+</div>
 
 <!-- مودال تعديل خلايا الجدول -->
 <div id="cellModal" class="modal-overlay">
@@ -227,7 +245,6 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
     </div>
 </div>
 
-<!-- تحميل مكتبات Firebase تلقائياً ومجهزة ببيانات مشروع wadi-aleayn -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
@@ -283,6 +300,22 @@ const DEFAULT_TEACHER_RULES = teachers.map((teacher, index) => {
 
 let TEACHER_RULES = [];
 let lessonsData = {}, patrolData = {}, activeCellInfo = null;
+
+function calculateTeacherAllocatedQuota() {
+    let counts = {};
+    getTeachersList().forEach(t => counts[t] = 0);
+    weekDays.forEach(day => {
+        classes.forEach(cls => {
+            for (let slot = 1; slot <= 6; slot++) {
+                let cell = lessonsData[day] && lessonsData[day][cls] ? lessonsData[day][cls][slot] : null;
+                if (cell && cell.teacher && cell.teacher.trim() !== "") {
+                    counts[cell.teacher] = (counts[cell.teacher] || 0) + 1;
+                }
+            }
+        });
+    });
+    return counts;
+}
 
 function sendGlobalNotification() {
     if (!isAdmin) return;
@@ -372,6 +405,7 @@ async function saveData() {
                 lessonsData: lessonsData,
                 patrolData: patrolData,
                 teacherRules: TEACHER_RULES,
+                adminPin: ADMIN_PIN,
                 lastUpdated: new Date().toISOString()
             });
         } catch (e) {
@@ -389,6 +423,62 @@ function switchView(view) {
 
 function isPrimaryClass(cls) { return cls.startsWith("الأول") || cls.startsWith("الثاني") || cls.startsWith("الثالث"); }
 function getTeachersList() { return TEACHER_RULES.map(t => t.name).filter(name => name && name.trim() !== ""); }
+
+/* --- استبيان الذكاء الاصطناعي والتوليد الذكي --- */
+function openAiQuestionnaire() {
+    if (!isAdmin) return;
+    const container = document.getElementById("questionnaireStepsContainer");
+    container.innerHTML = "";
+    
+    TEACHER_RULES.forEach((t, idx) => {
+        let item = document.createElement("div");
+        item.style.cssText = "background: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #e2e8f0;";
+        item.innerHTML = `
+            <strong style="color:var(--accent-color); font-size: 14px;">👨‍🏫 ${t.name}</strong>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 100px; gap: 8px; margin-top: 5px;">
+                <div>
+                    <label style="font-size: 11px; font-weight:700;">المادة التي يدرسها:</label>
+                    <select id="survey_sub_${idx}" class="form-control" style="font-size:12px; padding:4px;">
+                        ${allSubjects.map(s => `<option value="${s}" ${t.subjects.includes(s) ? 'selected' : ''}>${s}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight:700;">الصف المخصص له:</label>
+                    <select id="survey_cls_${idx}" class="form-control" style="font-size:12px; padding:4px;">
+                        ${classes.map(c => `<option value="${c}" ${t.classes.includes(c) ? 'selected' : ''}>${c}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight:700;">عدد الحصص المقررة:</label>
+                    <input type="number" id="survey_quota_${idx}" class="form-control" value="${t.maxQuota || 16}" style="font-size:12px; padding:4px;" min="1" max="30">
+                </div>
+            </div>
+        `;
+        container.appendChild(item);
+    });
+
+    document.getElementById("aiQuestionnaireModal").style.display = "flex";
+}
+
+function closeAiQuestionnaire() {
+    document.getElementById("aiQuestionnaireModal").style.display = "none";
+}
+
+function executeAiGenerationFromSurvey() {
+    // تحديث القواعد من الاستبيان
+    TEACHER_RULES.forEach((t, idx) => {
+        let sub = document.getElementById(`survey_sub_${idx}`).value;
+        let cls = document.getElementById(`survey_cls_${idx}`).value;
+        let quota = parseInt(document.getElementById(`survey_quota_${idx}`).value) || 16;
+        
+        t.subjects = [sub];
+        t.classes = [cls];
+        t.maxQuota = quota;
+    });
+
+    closeAiQuestionnaire();
+    generateAISchedule();
+}
 
 function generateAISchedule() {
     if (!isAdmin) return;
@@ -434,7 +524,7 @@ function generateAISchedule() {
     }
     saveData();
     renderVerticalSchedule();
-    alert("🤖 تم التوليد بنجاح!");
+    alert("🤖 تم التوليد بنجاح وفق القواعد المحددة!");
 }
 
 function countTeacherPatrols() {
@@ -479,12 +569,14 @@ function generateAdminReport() {
 
         grid.innerHTML = `<div class="stat-box"><div class="stat-number">${teacherNames.length}</div><div class="stat-label">إجمالي الكادر المعين</div></div>
                           <div class="stat-box"><div class="stat-number">${total}</div><div class="stat-label">مجموع الحصص الموزعة</div></div>`;
-        thead.innerHTML = "<tr><th>اسم المعلم</th><th>عدد الحصص الأسبوعية</th><th>المواد التي يدرسها</th></tr>";
+        thead.innerHTML = "<tr><th>اسم المعلم</th><th>عدد الحصص الأسبوعية / النصاب</th><th>المواد التي يدرسها</th></tr>";
         tbody.innerHTML = "";
         teacherNames.forEach(t => {
             let st = stats[t] || { count: 0, subjects: new Set() };
+            let rule = TEACHER_RULES.find(r => r.name === t);
+            let maxQuota = rule ? rule.maxQuota || 16 : 16;
             let subs = st.subjects.size > 0 ? Array.from(st.subjects).join(" ، ") : '<span style="color:#94a3b8;">غير مخصص</span>';
-            tbody.innerHTML += `<tr><td><strong>${t}</strong></td><td><b style="color:var(--accent-color);">${st.count}</b> حصة/حصص</td><td>${subs}</td></tr>`;
+            tbody.innerHTML += `<tr><td><strong>${t}</strong></td><td><b style="color:var(--accent-color);">${st.count} / ${maxQuota}</b> حصة/حصص</td><td>${subs}</td></tr>`;
         });
     } else {
         label.innerText = "(جدول المراقبة الميدانية)";
@@ -513,6 +605,8 @@ function renderVerticalSchedule() {
 }
 
 function renderLessonsView(container) {
+    let currentAllocatedQuotas = calculateTeacherAllocatedQuota();
+
     classes.forEach(cls => {
         let card = document.createElement("div");
         card.className = "class-section-card";
@@ -530,9 +624,20 @@ function renderLessonsView(container) {
             for (let slot = 1; slot <= 6; slot++) {
                 let cell = (lessonsData[day] && lessonsData[day][cls] && lessonsData[day][cls][slot]) ? lessonsData[day][cls][slot] : { subject: "-", teacher: "" };
                 let dis = isAdmin ? "" : "cell-disabled";
+
+                // عرض الحصص المقررة الخاصة بكل معلم للادارة فقط
+                let quotaHTML = "";
+                if (isAdmin && cell.teacher) {
+                    let rule = TEACHER_RULES.find(r => r.name === cell.teacher);
+                    let maxQuota = rule ? (rule.maxQuota || 16) : 16;
+                    let allocated = currentAllocatedQuotas[cell.teacher] || 0;
+                    quotaHTML = `<span class="quota-badge">الحصص: ${allocated} / ${maxQuota}</span>`;
+                }
+
                 tr.innerHTML += `<td class="cell-slot ${dis}" data-day="${day}" data-class="${cls}" data-slot="${slot}" onclick="openCellModal('${day}', '${cls}', ${slot})">
                     <div class="subject-title">${cell.subject}</div>
                     <div class="teacher-name">${cell.teacher || ""}</div>
+                    ${quotaHTML}
                 </td>`;
             }
             tbody.appendChild(tr);
