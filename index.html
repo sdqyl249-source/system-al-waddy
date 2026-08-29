@@ -244,9 +244,8 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // تم دمج مفتاح مشروع Firebase الخاص بك وادي العين هنا
   const firebaseConfig = {
     apiKey: "AIzaSyBLDeAq__ODPxd015mOnj70Hq6idXI5oOQ",
     authDomain: "wadi-aleayn.firebaseapp.com",
@@ -265,7 +264,10 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
   window.db = db;
   window.doc = doc;
   window.setDoc = setDoc;
-  window.getDoc = getDoc;
+  window.onSnapshot = onSnapshot;
+
+  // بدء الاستماع للتعديلات الحية من أي جهاز بمجرد الاتصال
+  window.initRealtimeSync();
 </script>
 
 <script>
@@ -344,7 +346,8 @@ function updateUIState() {
     renderVerticalSchedule();
 }
 
-async function loadOrCreateData() {
+// المزامنة المباشرة مع Firebase لجميع الأجهزة
+window.initRealtimeSync = function() {
     let lData = localStorage.getItem(STORAGE_LESSONS);
     let pData = localStorage.getItem(STORAGE_PATROL);
     let rData = localStorage.getItem(STORAGE_RULES);
@@ -354,19 +357,23 @@ async function loadOrCreateData() {
     patrolData = pData ? JSON.parse(pData) : createEmptyPatrolStructure();
 
     if (window.db) {
-        try {
-            const docRef = window.doc(window.db, "schedules", "mainSchedule");
-            const docSnap = await window.getDoc(docRef);
+        window.onSnapshot(window.doc(window.db, "schedules", "mainSchedule"), (docSnap) => {
             if (docSnap.exists()) {
                 const firebaseData = docSnap.data();
                 if(firebaseData.lessonsData) lessonsData = firebaseData.lessonsData;
                 if(firebaseData.patrolData) patrolData = firebaseData.patrolData;
                 if(firebaseData.teacherRules) TEACHER_RULES = firebaseData.teacherRules;
+                
+                // حفظ نسخة أوفلاين محلياً
+                localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
+                localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
+                localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
+
                 renderVerticalSchedule();
             }
-        } catch (e) {
-            console.log("تعذر الاتصال بـ Firebase، جاري استخدام التخزين المحلي:", e);
-        }
+        }, (error) => {
+            console.log("خطأ في المزامنة المباشرة، الاعتماد على التخزين المحلي:", error);
+        });
     }
 }
 
@@ -392,23 +399,23 @@ function createEmptyPatrolStructure() {
 }
 
 async function saveData() {
-    // 1. الحفظ المحلي الاحتياطي
+    // 1. الحفظ المحلي السريع
     localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
     localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
     localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
 
-    // 2. الحفظ السحابي في Firebase لجميع الأجهزة
+    // 2. الحفظ السحابي الحقيقي لإرساله لكافة الأجهزة
     if (window.db) {
         try {
             await window.setDoc(window.doc(window.db, "schedules", "mainSchedule"), {
                 lessonsData: lessonsData,
                 patrolData: patrolData,
                 teacherRules: TEACHER_RULES,
+                adminPin: ADMIN_PIN,
                 lastUpdated: new Date().toISOString()
             });
-            console.log("تمت المزامنة بنجاح مع Firebase!");
         } catch (e) {
-            console.error("خطأ في المزامنة السحابية:", e);
+            console.error("خطأ أثناء رفع التحديثات إلى Firebase:", e);
         }
     }
 }
@@ -521,7 +528,7 @@ function generateAISchedule() {
     }
     saveData();
     renderVerticalSchedule();
-    alert("🤖 تم التوليد بنجاح وفق القواعد المحددة!");
+    alert("🤖 تم التوليد بنجاح وفق القواعد المحددة ومزامنتها سحابياً!");
 }
 
 function countTeacherPatrols() {
@@ -917,7 +924,7 @@ function saveTeacherRule() {
     saveData();
     renderTeacherRulesTable();
     clearTeacherForm();
-    alert("💾 تم حفظ بيانات وقواعد المعلم بنجاح!");
+    alert("💾 تم حفظ بيانات وقواعد المعلم ومزامنتها مع كافة الأجهزة!");
 }
 
 function editTeacherRule(index) {
@@ -982,14 +989,16 @@ function resetAllData() {
         localStorage.removeItem(STORAGE_LESSONS);
         localStorage.removeItem(STORAGE_PATROL);
         localStorage.removeItem(STORAGE_RULES);
-        loadOrCreateData();
+        lessonsData = createEmptyLessonsStructure();
+        patrolData = createEmptyPatrolStructure();
+        TEACHER_RULES = [...DEFAULT_TEACHER_RULES];
+        saveData();
         renderVerticalSchedule();
         alert("🔄 تم إعادة ضبط البيانات بنجاح!");
     }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    loadOrCreateData();
     updateUIState();
 });
 </script>
