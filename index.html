@@ -392,21 +392,23 @@ function createEmptyPatrolStructure() {
 }
 
 async function saveData() {
+    // 1. الحفظ المحلي الاحتياطي
     localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
     localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
     localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
 
+    // 2. الحفظ السحابي في Firebase لجميع الأجهزة
     if (window.db) {
         try {
             await window.setDoc(window.doc(window.db, "schedules", "mainSchedule"), {
                 lessonsData: lessonsData,
                 patrolData: patrolData,
                 teacherRules: TEACHER_RULES,
-                adminPin: ADMIN_PIN,
                 lastUpdated: new Date().toISOString()
             });
+            console.log("تمت المزامنة بنجاح مع Firebase!");
         } catch (e) {
-            console.error("خطأ في حفظ البيانات في Firebase:", e);
+            console.error("خطأ في المزامنة السحابية:", e);
         }
     }
 }
