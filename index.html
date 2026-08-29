@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام إدارة الجدول المباشر والمراقبة الميدانية</title>
+<title>نظام إدارة الجدول المباشر والمراقبة الميدانية - مدرسة وادي العين</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root { --primary-color: #1e293b; --accent-color: #2563eb; --bg-color: #f1f5f9; --border-color: #cbd5e1; --danger-color: #ef4444; --success-color: #16a34a; }
@@ -144,16 +144,12 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
 
 <div id="scheduleContainer" class="vertical-container"></div>
 
-<!-- مودال استبيان التوليد الذكي قبل التعديل -->
+<!-- مودال استبيان التوليد الذكي -->
 <div id="aiQuestionnaireModal" class="modal-overlay">
     <div class="modal-content" style="width: 600px;">
         <h3 style="font-weight: 800; margin-top:0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">🤖 استبيان الذكاء الاصطناعي لتوزيع الجدول</h3>
         <p style="font-size: 13.5px; color: #475569;">يرجى التحقق وتحديد ما يدرسه كل معلم وصفوفه والنصاب المقرر قبل البدء بعملية التوليد:</p>
-        
-        <div id="questionnaireStepsContainer" style="max-height: 350px; overflow-y: auto; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; background: #f8fafc; margin-bottom: 15px;">
-            <!-- يتم تعبئة الأسئلة تلقائياً -->
-        </div>
-
+        <div id="questionnaireStepsContainer" style="max-height: 350px; overflow-y: auto; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; background: #f8fafc; margin-bottom: 15px;"></div>
         <div style="display: flex; justify-content: flex-end; gap: 10px;">
             <button class="btn btn-save" onclick="executeAiGenerationFromSurvey()">⚡ بدء التوليد الذكي الآن</button>
             <button class="btn btn-danger" onclick="closeAiQuestionnaire()">إلغاء</button>
@@ -250,6 +246,7 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
   import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+  // تم دمج مفتاح مشروع Firebase الخاص بك وادي العين هنا
   const firebaseConfig = {
     apiKey: "AIzaSyBLDeAq__ODPxd015mOnj70Hq6idXI5oOQ",
     authDomain: "wadi-aleayn.firebaseapp.com",
@@ -424,7 +421,6 @@ function switchView(view) {
 function isPrimaryClass(cls) { return cls.startsWith("الأول") || cls.startsWith("الثاني") || cls.startsWith("الثالث"); }
 function getTeachersList() { return TEACHER_RULES.map(t => t.name).filter(name => name && name.trim() !== ""); }
 
-/* --- استبيان الذكاء الاصطناعي والتوليد الذكي --- */
 function openAiQuestionnaire() {
     if (!isAdmin) return;
     const container = document.getElementById("questionnaireStepsContainer");
@@ -465,7 +461,6 @@ function closeAiQuestionnaire() {
 }
 
 function executeAiGenerationFromSurvey() {
-    // تحديث القواعد من الاستبيان
     TEACHER_RULES.forEach((t, idx) => {
         let sub = document.getElementById(`survey_sub_${idx}`).value;
         let cls = document.getElementById(`survey_cls_${idx}`).value;
@@ -625,7 +620,6 @@ function renderLessonsView(container) {
                 let cell = (lessonsData[day] && lessonsData[day][cls] && lessonsData[day][cls][slot]) ? lessonsData[day][cls][slot] : { subject: "-", teacher: "" };
                 let dis = isAdmin ? "" : "cell-disabled";
 
-                // عرض الحصص المقررة الخاصة بكل معلم للادارة فقط
                 let quotaHTML = "";
                 if (isAdmin && cell.teacher) {
                     let rule = TEACHER_RULES.find(r => r.name === cell.teacher);
