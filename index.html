@@ -243,26 +243,28 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBLDeAq__ODPxd015mOnj70Hq6idXI5oOQ",
     authDomain: "wadi-aleayn.firebaseapp.com",
-    databaseURL: "https://wadi-aleayn-default-rtdb.firebaseio.com",
     projectId: "wadi-aleayn",
     storageBucket: "wadi-aleayn.firebasestorage.app",
     messagingSenderId: "279971932853",
-    appId: "1:279971932853:web:e9a0cd8197d0293b7d6cfc"
+    appId: "1:279971932853:web:e9a0cd8197d0293b7d6cfc",
+    measurementId: "G-VN5QXY69KX"
   };
 
   const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app);
 
   window.app = app;
   window.db = db;
-  window.ref = ref;
-  window.set = set;
-  window.onValue = onValue;
+  window.doc = doc;
+  window.setDoc = setDoc;
+  window.onSnapshot = onSnapshot;
 
   // بدء الاستماع للتعديلات الحية من أي جهاز بمجرد الاتصال
   window.initRealtimeSync();
@@ -284,7 +286,35 @@ let allSubjects = ["التربية الإسلامية", "اللغة العربي
 let primarySubjects = ["التربية الإسلامية", "اللغة العربية", "اللغة الإنكليزية", "الرياضيات", "العلوم", "الأخلاقية", "التربية الرياضية", "التربية الفنية"];
 let upperSubjects = ["التربية الإسلامية", "اللغة العربية", "اللغة الإنكليزية", "الرياضيات", "العلوم", "الاجتماعيات", "التربية الرياضية", "التربية الفنية"];
 
-let teachers = ["أ. علي أحمد عبد الزهرة", "أ. كوثر جاسم اخميس", "أ. عبد الوهاب محمود شاكر", "أ. زينة جبر راضي", "أ. ليلى بدر عبود", "أ. أم كلثوم علي عيسى", "أ. تبارك خيري رسن", "أ. ماجدة جودة لعيبي", "أ. نضال محمود حسين", "أ. علياء حسين زوري", "أ. أمل حميد بدن", "أ. بيداء كريم لعيبي", "أ. إيمان علي عبد الحسين", "أ. إيلاف عماد إحسان", "أ. حسين حمد حمادي", "أ. أحمد عادل عبد القادر", "أ. سارة حميد علي", "أ. دعاء كريم سليم", "أ. شروق عماد عبد الحمزة", "أ. ابتسام شمخي عليوي", "أ. نورا علي عبد الشهيد", "أ. نور حسين عبد علي", "أ. علي طالب محمد", "أ. صادق يونس محمد", "أ. عقيل سعد عامر", "أ. نورا أسعد كامل", "أ. قاسم محمود"];
+let teachers = [
+  "أ. عقيل سعد عامر",
+  "أ. علي أحمد عبد الزهرة", 
+  "أ. كوثر جاسم اخميس", 
+  "أ. عبد الوهاب محمود شاكر", 
+  "أ. زينة جبر راضي", 
+  "أ. ليلى بدر عبود", 
+  "أ. أم كلثوم علي عيسى", 
+  "أ. تبارك خيري رسن", 
+  "أ. ماجدة جودة لعيبي", 
+  "أ. نضال محمود حسين", 
+  "أ. علياء حسين زوري", 
+  "أ. أمل حميد بدن", 
+  "أ. بيداء كريم لعيبي", 
+  "أ. إيمان علي عبد الحسين", 
+  "أ. إيلاف عماد إحسان", 
+  "أ. حسين حمد حمادي", 
+  "أ. أحمد عادل عبد القادر", 
+  "أ. سارة حميد علي", 
+  "أ. دعاء كريم سليم", 
+  "أ. شروق عماد عبد الحمزة", 
+  "أ. ابتسام شمخي عليوي", 
+  "أ. نورا علي عبد الشهيد", 
+  "أ. نور حسين عبد علي", 
+  "أ. علي طالب محمد", 
+  "أ. صادق يونس محمد", 
+  "أ. نورا أسعد كامل", 
+  "أ. قاسم محمود"
+];
 
 const DEFAULT_TEACHER_RULES = teachers.map((teacher, index) => {
     let assignedClasses = [], assignedSubjects = [];
@@ -344,7 +374,7 @@ function updateUIState() {
     renderVerticalSchedule();
 }
 
-// المزامنة المباشرة مع Realtime Database لجميع الأجهزة
+// المزامنة المباشرة مع Firebase لجميع الأجهزة
 window.initRealtimeSync = function() {
     let lData = localStorage.getItem(STORAGE_LESSONS);
     let pData = localStorage.getItem(STORAGE_PATROL);
@@ -355,14 +385,13 @@ window.initRealtimeSync = function() {
     patrolData = pData ? JSON.parse(pData) : createEmptyPatrolStructure();
 
     if (window.db) {
-        const scheduleRef = window.ref(window.db, 'mainSchedule');
-        window.onValue(scheduleRef, (snapshot) => {
-            const firebaseData = snapshot.val();
-            if (firebaseData) {
-                if (firebaseData.lessonsData) lessonsData = firebaseData.lessonsData;
-                if (firebaseData.patrolData) patrolData = firebaseData.patrolData;
-                if (firebaseData.teacherRules) TEACHER_RULES = firebaseData.teacherRules;
-
+        window.onSnapshot(window.doc(window.db, "schedules", "mainSchedule"), (docSnap) => {
+            if (docSnap.exists()) {
+                const firebaseData = docSnap.data();
+                if(firebaseData.lessonsData) lessonsData = firebaseData.lessonsData;
+                if(firebaseData.patrolData) patrolData = firebaseData.patrolData;
+                if(firebaseData.teacherRules) TEACHER_RULES = firebaseData.teacherRules;
+                
                 // حفظ نسخة أوفلاين محلياً
                 localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
                 localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
@@ -403,19 +432,18 @@ async function saveData() {
     localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
     localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
 
-    // 2. الحفظ السحابي الحقيقي في Realtime Database
+    // 2. الحفظ السحابي الحقيقي لإرساله لكافة الأجهزة
     if (window.db) {
         try {
-            await window.set(window.ref(window.db, 'mainSchedule'), {
+            await window.setDoc(window.doc(window.db, "schedules", "mainSchedule"), {
                 lessonsData: lessonsData,
                 patrolData: patrolData,
                 teacherRules: TEACHER_RULES,
                 adminPin: ADMIN_PIN,
                 lastUpdated: new Date().toISOString()
             });
-            console.log("✅ تم حفظ البيانات سحابياً على Realtime Database بنجاح!");
         } catch (e) {
-            console.error("❌ خطأ أثناء رفع التحديثات إلى Realtime Database:", e);
+            console.error("خطأ أثناء رفع التحديثات إلى Firebase:", e);
         }
     }
 }
@@ -889,7 +917,7 @@ function renderClassCheckboxes(selectedClasses = []) {
     container.innerHTML = "";
     classes.forEach(c => {
         let isChecked = selectedClasses.includes(c) ? "checked" : "";
-        let item = document.label ? document.createElement("label") : document.createElement("label");
+        let item = document.createElement("label");
         item.className = "checkbox-item";
         item.innerHTML = `<input type="checkbox" value="${c}" ${isChecked}> ${c}`;
         container.appendChild(item);
