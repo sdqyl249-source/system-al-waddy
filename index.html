@@ -243,28 +243,26 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBLDeAq__ODPxd015mOnj70Hq6idXI5oOQ",
     authDomain: "wadi-aleayn.firebaseapp.com",
+    databaseURL: "https://wadi-aleayn-default-rtdb.firebaseio.com",
     projectId: "wadi-aleayn",
     storageBucket: "wadi-aleayn.firebasestorage.app",
     messagingSenderId: "279971932853",
-    appId: "1:279971932853:web:e9a0cd8197d0293b7d6cfc",
-    measurementId: "G-VN5QXY69KX"
+    appId: "1:279971932853:web:e9a0cd8197d0293b7d6cfc"
   };
 
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const db = getFirestore(app);
+  const db = getDatabase(app);
 
   window.app = app;
   window.db = db;
-  window.doc = doc;
-  window.setDoc = setDoc;
-  window.onSnapshot = onSnapshot;
+  window.ref = ref;
+  window.set = set;
+  window.onValue = onValue;
 
   // بدء الاستماع للتعديلات الحية من أي جهاز بمجرد الاتصال
   window.initRealtimeSync();
@@ -346,7 +344,7 @@ function updateUIState() {
     renderVerticalSchedule();
 }
 
-// المزامنة المباشرة مع Firebase لجميع الأجهزة
+// المزامنة المباشرة مع Realtime Database لجميع الأجهزة
 window.initRealtimeSync = function() {
     let lData = localStorage.getItem(STORAGE_LESSONS);
     let pData = localStorage.getItem(STORAGE_PATROL);
@@ -357,13 +355,14 @@ window.initRealtimeSync = function() {
     patrolData = pData ? JSON.parse(pData) : createEmptyPatrolStructure();
 
     if (window.db) {
-        window.onSnapshot(window.doc(window.db, "schedules", "mainSchedule"), (docSnap) => {
-            if (docSnap.exists()) {
-                const firebaseData = docSnap.data();
-                if(firebaseData.lessonsData) lessonsData = firebaseData.lessonsData;
-                if(firebaseData.patrolData) patrolData = firebaseData.patrolData;
-                if(firebaseData.teacherRules) TEACHER_RULES = firebaseData.teacherRules;
-                
+        const scheduleRef = window.ref(window.db, 'mainSchedule');
+        window.onValue(scheduleRef, (snapshot) => {
+            const firebaseData = snapshot.val();
+            if (firebaseData) {
+                if (firebaseData.lessonsData) lessonsData = firebaseData.lessonsData;
+                if (firebaseData.patrolData) patrolData = firebaseData.patrolData;
+                if (firebaseData.teacherRules) TEACHER_RULES = firebaseData.teacherRules;
+
                 // حفظ نسخة أوفلاين محلياً
                 localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
                 localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
@@ -404,18 +403,19 @@ async function saveData() {
     localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
     localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
 
-    // 2. الحفظ السحابي الحقيقي لإرساله لكافة الأجهزة
+    // 2. الحفظ السحابي الحقيقي في Realtime Database
     if (window.db) {
         try {
-            await window.setDoc(window.doc(window.db, "schedules", "mainSchedule"), {
+            await window.set(window.ref(window.db, 'mainSchedule'), {
                 lessonsData: lessonsData,
                 patrolData: patrolData,
                 teacherRules: TEACHER_RULES,
                 adminPin: ADMIN_PIN,
                 lastUpdated: new Date().toISOString()
             });
+            console.log("✅ تم حفظ البيانات سحابياً على Realtime Database بنجاح!");
         } catch (e) {
-            console.error("خطأ أثناء رفع التحديثات إلى Firebase:", e);
+            console.error("❌ خطأ أثناء رفع التحديثات إلى Realtime Database:", e);
         }
     }
 }
@@ -889,7 +889,7 @@ function renderClassCheckboxes(selectedClasses = []) {
     container.innerHTML = "";
     classes.forEach(c => {
         let isChecked = selectedClasses.includes(c) ? "checked" : "";
-        let item = document.createElement("label");
+        let item = document.label ? document.createElement("label") : document.createElement("label");
         item.className = "checkbox-item";
         item.innerHTML = `<input type="checkbox" value="${c}" ${isChecked}> ${c}`;
         container.appendChild(item);
