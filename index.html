@@ -366,6 +366,13 @@ const DEFAULT_TEACHER_RULES = teachers.map((teacher, index) => {
 let TEACHER_RULES = [];
 let lessonsData = {}, patrolData = {}, activeCellInfo = null;
 
+function getTeachersList() { 
+    if (TEACHER_RULES && TEACHER_RULES.length > 0) {
+        return TEACHER_RULES.map(t => t.name).filter(name => name && name.trim() !== "");
+    }
+    return teachers;
+}
+
 function calculateTeacherAllocatedQuota() {
     let counts = {};
     getTeachersList().forEach(t => counts[t] = 0);
@@ -438,6 +445,8 @@ window.initRealtimeSync = function() {
         }, (error) => {
             console.log("خطأ في المزامنة المباشرة، الاعتماد على التخزين المحلي:", error);
         });
+    } else {
+        renderVerticalSchedule();
     }
 }
 
@@ -490,7 +499,6 @@ function switchView(view) {
 }
 
 function isPrimaryClass(cls) { return cls.startsWith("الأول") || cls.startsWith("الثاني") || cls.startsWith("الثالث"); }
-function getTeachersList() { return TEACHER_RULES.map(t => t.name).filter(name => name && name.trim() !== ""); }
 
 function openAiQuestionnaire() {
     if (!isAdmin) return;
@@ -622,7 +630,7 @@ function generateAdminReport() {
         weekDays.forEach(day => {
             classes.forEach(cls => {
                 for (let slot = 1; slot <= 6; slot++) {
-                    let cell = lessonsData[day][cls][slot];
+                    let cell = lessonsData[day] && lessonsData[day][cls] ? lessonsData[day][cls][slot] : null;
                     if (cell && cell.teacher && cell.subject !== "-") {
                         total++;
                         if (!stats[cell.teacher]) stats[cell.teacher] = { count: 0, subjects: new Set() };
@@ -651,7 +659,7 @@ function generateAdminReport() {
 
         grid.innerHTML = `<div class="stat-box"><div class="stat-number">${totalP}</div><div class="stat-label">إجمالي التكليفات الميدانية</div></div>
                           <div class="stat-box"><div class="stat-number">${patrolZones.length}</div><div class="stat-label">عدد القواطع الميدانية</div></div>`;
-        thead.innerHTML = "<tr><th>اسم المعلم / المراقب</th><th>عدد المراقبات الأسبوعية</th><th>الحالة التقديرية</th></tr>";
+        thead.innerHTML = "<tr><th>اسم المعلم / المراقب</th><th>عدد المراقبات الأسبوعية</th><th>الحالة التتقديرية</th></tr>";
         tbody.innerHTML = "";
         teacherNames.forEach(t => {
             let c = pCounts[t] || 0;
@@ -802,7 +810,7 @@ function resolveConflicts() {
             for (let slot = 1; slot <= 6; slot++) {
                 let teacherMap = {};
                 classes.forEach(cls => {
-                    let cell = lessonsData[day][cls][slot];
+                    let cell = lessonsData[day] && lessonsData[day][cls] ? lessonsData[day][cls][slot] : null;
                     if (cell && cell.teacher && cell.teacher.trim() !== "") {
                         if (!teacherMap[cell.teacher]) teacherMap[cell.teacher] = [];
                         teacherMap[cell.teacher].push(cls);
@@ -898,6 +906,8 @@ function applyCellEdit() {
         let { day, cls, slot } = activeCellInfo;
         let sub = document.getElementById("subjectSelect").value;
         let t = document.getElementById("teacherSelect").value;
+        if (!lessonsData[day]) lessonsData[day] = {};
+        if (!lessonsData[day][cls]) lessonsData[day][cls] = {};
         lessonsData[day][cls][slot] = { subject: sub, teacher: t };
     } else {
         let { day, zone } = activeCellInfo;
@@ -1069,9 +1079,12 @@ function resetAllData() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    updateUIState();
+    if (typeof window.initRealtimeSync === 'function') {
+        window.initRealtimeSync();
+    } else {
+        updateUIState();
+    }
 });
 </script>
-<script src="schedule-config.js"></script>
 </body>
 </html>
