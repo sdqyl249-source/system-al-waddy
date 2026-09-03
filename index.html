@@ -514,13 +514,13 @@ function openAiQuestionnaire() {
                 <div>
                     <label style="font-size: 11px; font-weight:700;">المادة التي يدرسها:</label>
                     <select id="survey_sub_${idx}" class="form-control" style="font-size:12px; padding:4px;">
-                        ${allSubjects.map(s => `<option value="${s}" ${t.subjects.includes(s) ? 'selected' : ''}>${s}</option>`).join('')}
+                        ${allSubjects.map(s => `<option value="${s}" ${(t.subjects || []).includes(s) ? 'selected' : ''}>${s}</option>`).join('')}
                     </select>
                 </div>
                 <div>
                     <label style="font-size: 11px; font-weight:700;">الصف المخصص له:</label>
                     <select id="survey_cls_${idx}" class="form-control" style="font-size:12px; padding:4px;">
-                        ${classes.map(c => `<option value="${c}" ${t.classes.includes(c) ? 'selected' : ''}>${c}</option>`).join('')}
+                        ${classes.map(c => `<option value="${c}" ${(t.classes || []).includes(c) ? 'selected' : ''}>${c}</option>`).join('')}
                     </select>
                 </div>
                 <div>
@@ -541,13 +541,15 @@ function closeAiQuestionnaire() {
 
 function executeAiGenerationFromSurvey() {
     TEACHER_RULES.forEach((t, idx) => {
-        let sub = document.getElementById(`survey_sub_${idx}`).value;
-        let cls = document.getElementById(`survey_cls_${idx}`).value;
-        let quota = parseInt(document.getElementById(`survey_quota_${idx}`).value) || 16;
+        let subEl = document.getElementById(`survey_sub_${idx}`);
+        let clsEl = document.getElementById(`survey_cls_${idx}`);
+        let quotaEl = document.getElementById(`survey_quota_${idx}`);
         
-        t.subjects = [sub];
-        t.classes = [cls];
-        t.maxQuota = quota;
+        if (subEl && clsEl && quotaEl) {
+            t.subjects = [subEl.value];
+            t.classes = [clsEl.value];
+            t.maxQuota = parseInt(quotaEl.value) || 16;
+        }
     });
 
     closeAiQuestionnaire();
@@ -559,21 +561,43 @@ function generateAISchedule() {
     let teacherNames = getTeachersList();
     if (currentView === 'lessons') {
         lessonsData = createEmptyLessonsStructure();
+        
+        // تتبع الحصص المعينة لكل معلم لعدم تجاوز النصاب
+        let assignedQuotas = {};
+        teacherNames.forEach(name => assignedQuotas[name] = 0);
+
         weekDays.forEach(day => {
             for (let slot = 1; slot <= 6; slot++) {
                 let assignedTeachersInSlot = new Set();
                 classes.forEach(cls => {
                     let availSubjects = isPrimaryClass(cls) ? [...primarySubjects] : [...upperSubjects];
                     let chosenSubject = availSubjects[Math.floor(Math.random() * availSubjects.length)];
-                    let matchingTeacher = TEACHER_RULES.find(t => t.name && t.subjects.includes(chosenSubject) && t.classes.includes(cls) && !assignedTeachersInSlot.has(t.name));
+                    
+                    // البحث عن معلم مطابق للشروط
+                    let matchingTeacher = TEACHER_RULES.find(t => 
+                        t.name && 
+                        (t.subjects || []).includes(chosenSubject) && 
+                        (t.classes || []).includes(cls) && 
+                        !assignedTeachersInSlot.has(t.name) &&
+                        (assignedQuotas[t.name] || 0) < (t.maxQuota || 16)
+                    );
+
                     if (matchingTeacher) {
                         lessonsData[day][cls][slot] = { subject: chosenSubject, teacher: matchingTeacher.name };
                         assignedTeachersInSlot.add(matchingTeacher.name);
+                        assignedQuotas[matchingTeacher.name] = (assignedQuotas[matchingTeacher.name] || 0) + 1;
                     } else {
-                        let fallbackTeacher = TEACHER_RULES.find(t => t.name && t.subjects.includes(chosenSubject) && !assignedTeachersInSlot.has(t.name));
+                        // معلم بديل يدرس المادة
+                        let fallbackTeacher = TEACHER_RULES.find(t => 
+                            t.name && 
+                            (t.subjects || []).includes(chosenSubject) && 
+                            !assignedTeachersInSlot.has(t.name) &&
+                            (assignedQuotas[t.name] || 0) < (t.maxQuota || 16)
+                        );
                         if (fallbackTeacher) {
                             lessonsData[day][cls][slot] = { subject: chosenSubject, teacher: fallbackTeacher.name };
                             assignedTeachersInSlot.add(fallbackTeacher.name);
+                            assignedQuotas[fallbackTeacher.name] = (assignedQuotas[fallbackTeacher.name] || 0) + 1;
                         } else {
                             lessonsData[day][cls][slot] = { subject: chosenSubject, teacher: "" };
                         }
@@ -659,7 +683,7 @@ function generateAdminReport() {
 
         grid.innerHTML = `<div class="stat-box"><div class="stat-number">${totalP}</div><div class="stat-label">إجمالي التكليفات الميدانية</div></div>
                           <div class="stat-box"><div class="stat-number">${patrolZones.length}</div><div class="stat-label">عدد القواطع الميدانية</div></div>`;
-        thead.innerHTML = "<tr><th>اسم المعلم / المراقب</th><th>عدد المراقبات الأسبوعية</th><th>الحالة التتقديرية</th></tr>";
+        thead.innerHTML = "<tr><th>اسم المعلم / المراقب</th><th>عدد المراقبات الأسبوعية</th><th>الحالة التقديرية</th></tr>";
         tbody.innerHTML = "";
         teacherNames.forEach(t => {
             let c = pCounts[t] || 0;
@@ -941,7 +965,7 @@ function closeTeachersConfigModal() {
 function populateTeacherSelectOptions() {
     let sel = document.getElementById("selectTeacherName");
     sel.innerHTML = '<option value="">-- اختر من قائمة الأسماء الافتراضية --</option>';
-    teachers.forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
+    getTeachersList().forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
     sel.innerHTML += '<option value="__custom__">+ إضافة معلم جديد باسم مخصص</option>';
 }
 
@@ -1003,6 +1027,7 @@ function saveTeacherRule() {
 
     saveData();
     renderTeacherRulesTable();
+    populateTeacherSelectOptions();
     clearTeacherForm();
     alert("💾 تم حفظ بيانات وقواعد المعلم ومزامنتها مع كافة الأجهزة!");
 }
@@ -1012,7 +1037,10 @@ function editTeacherRule(index) {
     if (!rule) return;
     document.getElementById("editTeacherIndex").value = index;
     let selName = document.getElementById("selectTeacherName");
-    if (teachers.includes(rule.name)) {
+    
+    // فحص ما إذا كان اسم المعلم موجوُدًا ضمن خيارات القائمة القائمة
+    let options = Array.from(selName.options).map(o => o.value);
+    if (options.includes(rule.name)) {
         selName.value = rule.name;
         toggleCustomTeacherInput(rule.name);
     } else {
@@ -1030,6 +1058,7 @@ function deleteTeacherRule(index) {
         TEACHER_RULES.splice(index, 1);
         saveData();
         renderTeacherRulesTable();
+        populateTeacherSelectOptions();
     }
 }
 
@@ -1048,8 +1077,8 @@ function renderTeacherRulesTable() {
     document.getElementById("teacherRulesCount").innerText = TEACHER_RULES.length;
     tbody.innerHTML = "";
     TEACHER_RULES.forEach((rule, idx) => {
-        let subs = rule.subjects.length > 0 ? rule.subjects.join("، ") : "-";
-        let cls = rule.classes.length > 0 ? rule.classes.join("، ") : "-";
+        let subs = (rule.subjects && rule.subjects.length > 0) ? rule.subjects.join("، ") : "-";
+        let cls = (rule.classes && rule.classes.length > 0) ? rule.classes.join("، ") : "-";
         tbody.innerHTML += `<tr>
             <td><strong>${rule.name}</strong></td>
             <td><small>${subs}</small></td>
