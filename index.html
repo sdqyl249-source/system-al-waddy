@@ -466,7 +466,7 @@ window.initRealtimeSync = function() {
                 localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
                 localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
                 localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
-                localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
+    localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
 
                 renderVerticalSchedule();
             }
@@ -541,7 +541,7 @@ async function generateAISchedule() {
         return;
     }
 
-    // الخطة المعتمدة: عدد الحصص لكل شعبة، وليس مجموع الصف.
+    // الخطة المعتمدة لحصص الشعبة الواحدة
     const plan = {
         "الأول": {"التربية الإسلامية":2,"اللغة العربية":7,"اللغة الإنكليزية":2,"الرياضيات":5,"العلوم":2,"فنية ونشيد":1,"رياضة":1},
         "الثاني":{"التربية الإسلامية":2,"اللغة العربية":7,"اللغة الإنكليزية":2,"الرياضيات":5,"العلوم":2,"فنية ونشيد":1,"رياضة":1},
@@ -551,12 +551,13 @@ async function generateAISchedule() {
         "السادس":{"التربية الإسلامية":2,"اللغة العربية":4,"اللغة الإنكليزية":3,"الرياضيات":4,"العلوم":2,"الاجتماعيات":3,"فنية ونشيد":1,"رياضة":1}
     };
 
-    // توحيد أسماء المواد القديمة والجديدة قبل التوليد.
+    // توحيد المسميات
     const normalizeSubject = (s) => ({
         "التربية الفنية":"فنية ونشيد", "الفنية والنشيد":"فنية ونشيد",
         "التربية الرياضية":"رياضة", "الرياضة":"رياضة",
         "اسلامية":"التربية الإسلامية", "إسلامية":"التربية الإسلامية"
     }[s] || s);
+
     rules.forEach(t => {
         t.subjects = (t.subjects || []).map(normalizeSubject);
         if (t.subjectClasses) {
@@ -566,8 +567,16 @@ async function generateAISchedule() {
         }
     });
 
+    // دالة التحقق من أيام التفرغ الخاصة بالمعلمين
+    const isTeacherOffOnDay = (teacherName, day) => {
+        if (teacherName.includes("عقيل") && day === "الأحد") return true;
+        if (teacherName.includes("صادق") && day === "الخميس") return true;
+        if (teacherName.includes("نورا أسعد") && day === "الثلاثاء") return true;
+        if (teacherName.includes("علي طالب") && day === "الخميس") return true;
+        return false;
+    };
+
     const teacherLoad = Object.fromEntries(rules.map(t => [t.name, 0]));
-    const teacherBusy = Object.fromEntries(weekDays.map(day => [day, {}]));
     const warnings = [];
     lessonsData = createEmptyLessonsStructure();
 
@@ -576,13 +585,11 @@ async function generateAISchedule() {
         const quota = plan[grade];
         if (!quota) continue;
 
-        // عدّاد مستقل لكل مادة ولكل يوم.
         const subjectDayCount = {};
         Object.keys(quota).forEach(subject => {
             subjectDayCount[subject] = Object.fromEntries(weekDays.map(day => [day, 0]));
         });
 
-        // نضع المواد ذات الحصص الأعلى أولاً، مع خلط بسيط لكسر التساوي.
         const queue = Object.entries(quota)
             .flatMap(([subject, count]) => Array(count).fill(subject))
             .sort((a, b) => quota[b] - quota[a] || Math.random() - 0.5);
@@ -590,27 +597,26 @@ async function generateAISchedule() {
         for (const subject of queue) {
             let placed = false;
 
-            // الأولوية للأيام التي لم تأخذ المادة فيها حصة بعد، ثم الأقل استعمالاً.
             const orderedDays = [...weekDays].sort((a, b) => {
                 const diff = subjectDayCount[subject][a] - subjectDayCount[subject][b];
                 return diff || Math.random() - 0.5;
             });
 
             for (const day of orderedDays) {
-                // لا تزيد المادة عن حصتين في اليوم للشعبة نفسها.
-                if (subjectDayCount[subject][day] >= 2) continue;
+                // يسمح للمادة بالظهور حتى 3 حصص في اليوم لنفس الشعبة كحد أقصى
+                if (subjectDayCount[subject][day] >= 3) continue;
 
-                // توزيع متوازن للحصص داخل اليوم.
                 const availableSlots = [1, 2, 3, 4].sort(() => Math.random() - 0.5);
 
                 for (const slot of availableSlots) {
                     const candidates = rules
                         .filter(t =>
+                            !isTeacherOffOnDay(t.name, day) && // تطبيق استثناءات التفرغ
                             t.classes.includes(cls) &&
                             t.subjects.includes(subject) &&
                             (!t.subjectClasses || !Object.prototype.hasOwnProperty.call(t.subjectClasses, subject) || t.subjectClasses[subject].includes(cls)) &&
-                            teacherLoad[t.name] < Number(t.maxQuota || 16) &&
-                            !Object.values(lessonsData[day]).some(c => c[slot]?.teacher === t.name)
+                            teacherLoad[t.name] < Math.min(Number(t.maxQuota || 16), 16) && // حد النصاب 16 حصة
+                            !Object.values(lessonsData[day]).some(c => c[slot]?.teacher === t.name) // منع تضارب المعلم في نفس الوقت
                         )
                         .sort((a, b) => teacherLoad[a.name] - teacherLoad[b.name]);
 
@@ -643,10 +649,9 @@ async function generateAISchedule() {
         console.warn("تنبيهات التوليد:", warnings);
         alert(`تم تكوين الجدول، لكن تعذر إسناد ${warnings.length} حصة. راجع قواعد المعلمين والنصاب.`);
     } else {
-        alert("تم تكوين الجدول وفق خطة كل شعبة: 20 حصة أسبوعياً، 4 حصص يومياً، وبحد أقصى حصتين للمادة في اليوم مع توزيعها على أيام الأسبوع.");
+        alert("تم توليد الجدول بنجاح دون أي تضارب! تم تطبيق تفريغ المعلمين، وسقف 16 حصة للنصاب، مع السماح بـ 3 حصص للمادة يومياً للشعبة.");
     }
 }
-
 function countTeacherPatrols() {
     let counts = {};
     let teacherNames = getTeachersList();
@@ -998,6 +1003,7 @@ function toggleCustomTeacherInput(val) {
 }
 
 function renderSubjectChips(selectedSubjects = []) {
+    // التوافق مع البيانات القديمة: لم يعد الإدخال يعتمد على مربعات المواد.
     renderAssignmentSubjectOptions(selectedSubjects[0] || "");
 }
 
@@ -1016,7 +1022,6 @@ function renderAssignmentSubjectOptions(selectedSubjects = []) {
     sel.innerHTML = subjects.map(s => `<option value="${s}" ${selected.includes(s) ? "selected" : ""}>${s}</option>`).join("");
     renderLinkedClassCheckboxes();
 }
-
 function renderLinkedClassCheckboxes(selectedClasses = null) {
     const subject = document.getElementById("assignmentSubjectSelect")?.value;
     const container = document.getElementById("linkedClassCheckboxContainer");
