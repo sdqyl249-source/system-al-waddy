@@ -139,7 +139,7 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
     </div>
     <div class="btn-group">
         <button class="btn btn-manage admin-only" onclick="openTeachersConfigModal()">👨‍🏫 إدارة بيانات وقواعد المعلمين</button>
-        <button class="btn btn-ai admin-only" onclick="generateAIScheduleAndFillEmpty()">🤖 توليد الجدول وملء الفراغات</button>
+        <button class="btn btn-ai admin-only" onclick="generateAIScheduleAndFillEmpty()">🤖 توليد الجدول حسب النصاب وقاعدة البيانات</button>
         <button class="btn btn-fix admin-only" onclick="resolveConflicts()">✨ إصلاح التضارب</button>
         <button class="btn btn-notify admin-only" onclick="sendGlobalNotification()">🔔 إرسال الإشعارات للكل</button>
         <button class="btn btn-print" onclick="window.print()">🖨️ طباعة الجدول</button>
@@ -221,7 +221,7 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
                 </div>
             </div>
             <div style="margin-bottom: 10px;">
-                <label style="font-size: 13px; font-weight: 700;">المادة</label>
+                <label style="font-size: 13px; font-weight: 700;">المادة (المسندة من قاعدة البيانات)</label>
                 <select id="assignmentSubjectSelect" class="form-control" multiple size="4" onchange="renderLinkedClassCheckboxes()">
                 </select>
             </div>
@@ -292,7 +292,6 @@ let lessonsData = {}, patrolData = {}, activeCellInfo = null;
 
 function getTeachersList() { return TEACHER_RULES.map(t => t.name); }
 
-// شرط التفرغ الخاص بالأيام المتفق عليها
 const isTeacherOffOnDay = (teacherName, day) => {
     if (teacherName.includes("عقيل") && day === "الأحد") return true;
     if (teacherName.includes("صادق") && day === "الخميس") return true;
@@ -301,16 +300,17 @@ const isTeacherOffOnDay = (teacherName, day) => {
     return false;
 };
 
-// التوليد الذكي وملء الشواغر التلقائي بدون تضارب أو تماس معلمين
+// التوليد المنهجي وملء الحقول بناءً على عدد الحصص لكل مادة والمادة المسندة للمعلم بقاعدة البيانات
 async function generateAIScheduleAndFillEmpty() {
     if (!isAdmin) return;
 
     const rules = TEACHER_RULES.filter(t => t && t.name && Array.isArray(t.subjects) && Array.isArray(t.classes));
     if (!rules.length) {
-        alert("لا توجد قواعد معلمين صالحة لاستخدامها في التوليد.");
+        alert("لا توجد قواعد معلمين مسجلة في قاعدة البيانات.");
         return;
     }
 
+    // الخطة المعتمدة لعدد الحصص الأسبوعية لكل مادة بحسب الصف
     const plan = {
         "الأول": {"التربية الإسلامية": 2, "اللغة العربية": 7, "اللغة الإنكليزية": 2, "الرياضيات": 5, "العلوم": 2, "فنية ونشيد": 1, "رياضة": 1},
         "الثاني": {"التربية الإسلامية": 2, "اللغة العربية": 7, "اللغة الإنكليزية": 2, "الرياضيات": 5, "العلوم": 2, "فنية ونشيد": 1, "رياضة": 1},
@@ -321,90 +321,56 @@ async function generateAIScheduleAndFillEmpty() {
     };
 
     const teacherLoad = Object.fromEntries(rules.map(t => [t.name, 0]));
-    
-    // سريان ربط المعلم المخصص لكل مادة لشعبة واحدة منعاً للتماس والتعدد
-    const classSubjectAssignedTeacher = {}; 
-
     lessonsData = createEmptyLessonsStructure();
 
-    // المرحلة الأولى: التوليد المنهجي وفق الخطة
+    let placedLessons = 0;
+
     for (const cls of classes) {
         const grade = cls.split(" - ")[0];
-        const quota = plan[grade];
-        if (!quota) continue;
+        const subjectQuotas = plan[grade];
+        if (!subjectQuotas) continue;
 
+        // مصفوفة الحصص المتبقية المطلوب إدراجها لكل مادة حسب الخطة
+        const remainingQuota = { ...subjectQuotas };
         const subjectDayCount = {};
-        Object.keys(quota).forEach(subject => subjectDayCount[subject] = Object.fromEntries(weekDays.map(day => [day, 0])));
+        Object.keys(subjectQuotas).forEach(s => subjectDayCount[s] = Object.fromEntries(weekDays.map(d => [d, 0])));
 
-        const queue = Object.entries(quota)
-            .flatMap(([subject, count]) => Array(count).fill(subject))
-            .sort((a, b) => quota[b] - quota[a] || Math.random() - 0.5);
+        // توزيع الحصص بناءً على نصاب كل مادة من قاعدة البيانات
+        for (const day of weekDays) {
+            for (let slot = 1; slot <= 4; slot++) {
+                if (lessonsData[day][cls][slot].subject !== "-") continue;
 
-        for (const subject of queue) {
-            let placed = false;
-            const orderedDays = [...weekDays].sort((a, b) => subjectDayCount[subject][a] - subjectDayCount[subject][b]);
+                // التفتيش عن مادة لا زال لها نصاب متبقي ولها معلم مخصص ومسند في قاعدة البيانات لهذا الصف
+                const availableSubjects = Object.keys(remainingQuota).filter(s => remainingQuota[s] > 0);
 
-            for (const day of orderedDays) {
-                if (subjectDayCount[subject][day] >= 3) continue;
-                const availableSlots = [1, 2, 3, 4].sort(() => Math.random() - 0.5);
+                for (const subject of availableSubjects) {
+                    if (subjectDayCount[subject][day] >= 2) continue; // تجنب تكثيف المادة في نفس اليوم أكثر من مرتين
 
-                for (const slot of availableSlots) {
-                    if (lessonsData[day][cls][slot]?.subject !== "-") continue;
+                    // البحث في قاعدة البيانات عن المعلم المخصص لهذه المادة وهذا الصف
+                    const assignedTeacherRule = rules.find(t => 
+                        t.subjects.includes(subject) && 
+                        t.classes.includes(cls) &&
+                        !isTeacherOffOnDay(t.name, day) &&
+                        teacherLoad[t.name] < Number(t.maxQuota || 16) &&
+                        !Object.values(lessonsData[day]).some(c => c[slot]?.teacher === t.name)
+                    );
 
-                    // مفتاح التماس لمنع معلم آخر من تدريس نفس المادة للشعبة
-                    const csKey = `${cls}_${subject}`;
-                    const assignedTeacher = classSubjectAssignedTeacher[csKey];
-
-                    const candidate = rules.find(t => {
-                        if (isTeacherOffOnDay(t.name, day)) return false; // تطبيق التفرغ
-                        if (!t.classes.includes(cls) || !t.subjects.includes(subject)) return false;
-                        if (teacherLoad[t.name] >= Math.min(Number(t.maxQuota || 16), 16)) return false; // سقف النصاب
-                        if (Object.values(lessonsData[day]).some(c => c[slot]?.teacher === t.name)) return false; // منع التضارب الزمني
-                        if (assignedTeacher && assignedTeacher !== t.name) return false; // منع التماس بين معلمين لمادة واحدة
-                        return true;
-                    });
-
-                    if (candidate) {
-                        lessonsData[day][cls][slot] = { subject, teacher: candidate.name };
-                        teacherLoad[candidate.name]++;
+                    if (assignedTeacherRule) {
+                        lessonsData[day][cls][slot] = { subject: subject, teacher: assignedTeacherRule.name };
+                        remainingQuota[subject]--;
                         subjectDayCount[subject][day]++;
-                        classSubjectAssignedTeacher[csKey] = candidate.name;
-                        placed = true;
+                        teacherLoad[assignedTeacherRule.name]++;
+                        placedLessons++;
                         break;
                     }
                 }
-                if (placed) break;
             }
         }
     }
 
-    // المرحلة الثانية: ملء الفراغات المتبقية تلقائياً بالأخذ في الاعتبار القواعد ذاتها
-    let filledCount = 0;
-    weekDays.forEach(day => {
-        classes.forEach(cls => {
-            for (let slot = 1; slot <= 4; slot++) {
-                if (lessonsData[day][cls][slot].subject === "-") {
-                    const candidate = rules.find(t =>
-                        !isTeacherOffOnDay(t.name, day) &&
-                        t.classes.includes(cls) &&
-                        teacherLoad[t.name] < Math.min(Number(t.maxQuota || 16), 16) &&
-                        !Object.values(lessonsData[day]).some(c => c[slot]?.teacher === t.name)
-                    );
-
-                    if (candidate) {
-                        const subj = candidate.subjects[0] || "مادة إضافية";
-                        lessonsData[day][cls][slot] = { subject: subj, teacher: candidate.name };
-                        teacherLoad[candidate.name]++;
-                        filledCount++;
-                    }
-                }
-            }
-        });
-    });
-
     await saveData();
     renderVerticalSchedule();
-    alert(`تم التوليد المباشر وملء (${filledCount}) حصة شاغرة بدون أي تماس معلمين لنفس المادة وبإلزام أيام التفرغ!`);
+    alert(`تم التوليد وإملاء الحقول بنجاح لعدد (${placedLessons}) حصة استناداً إلى النصاب المحدد لكل مادة وقاعدة بيانات المعلمين المسندة!`);
 }
 
 function resolveConflicts() {
@@ -417,7 +383,6 @@ function resolveConflicts() {
                 let cell = lessonsData[day][cls][slot];
                 if (cell && cell.teacher && cell.teacher !== "") {
                     if (teacherMap[cell.teacher]) {
-                        // تضارب زمني - إعادة تفريغ
                         lessonsData[day][cls][slot] = { subject: "-", teacher: "" };
                         resolved++;
                     } else {
