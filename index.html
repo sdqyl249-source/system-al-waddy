@@ -107,7 +107,6 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 td.cell-slot { cursor: pointer; transition: filter 0.2s ease; }
 td.cell-slot:hover { filter: brightness(0.9) !important; }
 td.cell-disabled { cursor: not-allowed !important; opacity: 0.85; }
-td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(--danger-color) !important; box-shadow: inset 0 0 5px rgba(239,68,68,0.5); }
 
 /* النوافذ المنبثقة المتجاوبة */
 .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 10px; }
@@ -152,25 +151,6 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
     <button id="tabPatrol" class="nav-tab" onclick="switchView('patrol')">🛡️ جدول مراقبة الساحة والممرات</button>
 </div>
 
-<div id="adminReportCard" class="report-card">
-    <div class="report-title">
-        <span>📊 تقرير الإدارة المفصل <span id="reportTabLabel" style="font-size: 13.5px; font-weight: 700; color: #64748b;">(جدول الدروس)</span></span>
-        <span class="admin-badge-tag">🔒 خاص بالإدارة فقط</span>
-    </div>
-    <div class="stats-grid" id="statsGrid"></div>
-    <div class="report-table-wrapper">
-        <table class="report-table">
-            <thead id="reportTableHeader"></thead>
-            <tbody id="reportTableBody"></tbody>
-        </table>
-    </div>
-</div>
-
-<div id="conflictBanner" class="conflict-panel">
-    <strong style="font-size: 15px;">🚨 كاشف ومحدد مواقع التضارب الذكي:</strong>
-    <div id="conflictList" style="margin-top: 5px;"></div>
-</div>
-
 <div id="scheduleContainer" class="vertical-container"></div>
 
 <!-- مودال تعديل خلايا الجدول -->
@@ -207,12 +187,21 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
 <!-- مودال إدارة المعلمين -->
 <div id="teachersConfigModal" class="modal-overlay">
     <div class="modal-content" style="width: 720px;">
-        <h3 style="font-weight: 800; margin-top:0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">⚙️ قاعدة بيانات المعلمين</h3>
+        <h3 style="font-weight: 800; margin-top:0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">⚙️ إدارة وقواعد بيانات المعلمين</h3>
+        
+        <!-- قسم إضافة معلم جديد -->
+        <div style="background-color: #e0f2fe; padding: 12px; border-radius: 8px; border: 1px solid #0284c7; margin-bottom: 15px;">
+            <label style="font-size: 13.5px; font-weight: 800; color: #0369a1;">➕ إضافة معلم جديد للقائمة:</label>
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+                <input type="text" id="newTeacherNameInput" class="form-control" style="margin-top:0;" placeholder="أدخل اسم المعلم الجديد...">
+                <button class="btn btn-save" style="width: auto; whitespace: nowrap;" onclick="addNewTeacherName()">إضافة</button>
+            </div>
+        </div>
+
         <div style="background-color: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px;">
-            <input type="hidden" id="editTeacherIndex" value="-1">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                 <div>
-                    <label style="font-size: 13px; font-weight: 700;">المعلم</label>
+                    <label style="font-size: 13px; font-weight: 700;">اختيار المعلم للتكليف</label>
                     <select id="selectTeacherName" class="form-control" onchange="onTeacherSelected(this.value)"></select>
                 </div>
                 <div>
@@ -221,16 +210,16 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
                 </div>
             </div>
             <div style="margin-bottom: 10px;">
-                <label style="font-size: 13px; font-weight: 700;">المادة (المسندة من قاعدة البيانات)</label>
-                <select id="assignmentSubjectSelect" class="form-control" multiple size="4" onchange="renderLinkedClassCheckboxes()">
+                <label style="font-size: 13px; font-weight: 700;">المواد المسندة للمعلم</label>
+                <select id="assignmentSubjectSelect" class="form-control" multiple size="4">
                 </select>
             </div>
             <div style="margin-bottom:10px; background:#eef6ff; padding:10px; border-radius:8px;">
-                <label style="font-size:13px; font-weight:700;">الصف والشعب المرتبطة بالمادة</label>
+                <label style="font-size:13px; font-weight:700;">الصف الشُعب المرتبطة</label>
                 <div class="checkbox-group" id="linkedClassCheckboxContainer" style="margin-top:8px;"></div>
             </div>
             <div style="display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end;">
-                <button class="btn btn-save" style="width: auto;" onclick="saveTeacherRule()">💾 حفظ المعلم في القاعدة</button>
+                <button class="btn btn-save" style="width: auto;" onclick="saveTeacherRule()">💾 حفظ الربط والقواعد</button>
                 <button class="btn btn-danger" style="width: auto;" onclick="clearTeacherForm()">إلغاء</button>
             </div>
         </div>
@@ -256,10 +245,10 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
 </div>
 
 <script>
-const STORAGE_LESSONS = 'SCHEDULE_LESSONS_PERMANENT_V5';
-const STORAGE_PATROL = 'SCHEDULE_PATROL_PERMANENT_V5';
-const STORAGE_RULES = 'TEACHERS_RULES_PERMANENT_V5';
-const STORAGE_CONFIG = 'SCHOOL_CONFIG_PERMANENT_V1';
+const STORAGE_LESSONS = 'SCHEDULE_LESSONS_PERMANENT_V6';
+const STORAGE_PATROL = 'SCHEDULE_PATROL_PERMANENT_V6';
+const STORAGE_RULES = 'TEACHERS_RULES_PERMANENT_V6';
+const STORAGE_TEACHERS_LIST = 'TEACHERS_LIST_PERMANENT_V6';
 const ADMIN_PIN = "19801234";
 
 let isAdmin = localStorage.getItem("SCHOOL_ADMIN_SESSION") === "1";
@@ -275,6 +264,7 @@ let classes = [
 ];
 let patrolZones = ["الساحة - جهة الروضة", "الساحة - مركز الساحة", "الساحة - جهة المخزن", "الممر - العلوي الأول", "الممر - العلوي السادس", "الممر - السفلي الأول", "الممر - السفلي السادس"];
 
+// القائمة العامة الافتراضية للمعلمين
 let teachers = [
   "أ. عقيل سعد عامر", "أ. صادق يونس محمد", "أ. نورا أسعد كامل", "أ. علي طالب محمد",
   "أ. علي أحمد عبد الزهرة", "أ. كوثر جاسم اخميس", "أ. عبد الوهاب محمود شاكر", 
@@ -290,7 +280,21 @@ let TEACHER_RULES = [
 
 let lessonsData = {}, patrolData = {}, activeCellInfo = null;
 
-function getTeachersList() { return TEACHER_RULES.map(t => t.name); }
+function getTeachersList() { return teachers; }
+
+// إضافة معلم جديد تلقائياً
+function addNewTeacherName() {
+    const input = document.getElementById("newTeacherNameInput");
+    const name = input.value.trim();
+    if (!name) { alert("يرجى كتابة اسم المعلم أولاً!"); return; }
+    if (teachers.includes(name)) { alert("المعلم موجود بالفعل في القائمة!"); return; }
+    
+    teachers.push(name);
+    saveData();
+    populateTeacherSelectOptions();
+    input.value = "";
+    alert(`تمت إضافة المعلم (${name}) بنجاح!`);
+}
 
 const isTeacherOffOnDay = (teacherName, day) => {
     if (teacherName.includes("عقيل") && day === "الأحد") return true;
@@ -300,7 +304,7 @@ const isTeacherOffOnDay = (teacherName, day) => {
     return false;
 };
 
-// التوليد المنهجي وملء الحقول بناءً على عدد الحصص لكل مادة والمادة المسندة للمعلم بقاعدة البيانات
+// التوليد الذكي وملء الحقول بناءً على عدد الحصص لكل مادة وقاعدة البيانات
 async function generateAIScheduleAndFillEmpty() {
     if (!isAdmin) return;
 
@@ -310,7 +314,6 @@ async function generateAIScheduleAndFillEmpty() {
         return;
     }
 
-    // الخطة المعتمدة لعدد الحصص الأسبوعية لكل مادة بحسب الصف
     const plan = {
         "الأول": {"التربية الإسلامية": 2, "اللغة العربية": 7, "اللغة الإنكليزية": 2, "الرياضيات": 5, "العلوم": 2, "فنية ونشيد": 1, "رياضة": 1},
         "الثاني": {"التربية الإسلامية": 2, "اللغة العربية": 7, "اللغة الإنكليزية": 2, "الرياضيات": 5, "العلوم": 2, "فنية ونشيد": 1, "رياضة": 1},
@@ -330,23 +333,19 @@ async function generateAIScheduleAndFillEmpty() {
         const subjectQuotas = plan[grade];
         if (!subjectQuotas) continue;
 
-        // مصفوفة الحصص المتبقية المطلوب إدراجها لكل مادة حسب الخطة
         const remainingQuota = { ...subjectQuotas };
         const subjectDayCount = {};
         Object.keys(subjectQuotas).forEach(s => subjectDayCount[s] = Object.fromEntries(weekDays.map(d => [d, 0])));
 
-        // توزيع الحصص بناءً على نصاب كل مادة من قاعدة البيانات
         for (const day of weekDays) {
             for (let slot = 1; slot <= 4; slot++) {
                 if (lessonsData[day][cls][slot].subject !== "-") continue;
 
-                // التفتيش عن مادة لا زال لها نصاب متبقي ولها معلم مخصص ومسند في قاعدة البيانات لهذا الصف
                 const availableSubjects = Object.keys(remainingQuota).filter(s => remainingQuota[s] > 0);
 
                 for (const subject of availableSubjects) {
-                    if (subjectDayCount[subject][day] >= 2) continue; // تجنب تكثيف المادة في نفس اليوم أكثر من مرتين
+                    if (subjectDayCount[subject][day] >= 2) continue;
 
-                    // البحث في قاعدة البيانات عن المعلم المخصص لهذه المادة وهذا الصف
                     const assignedTeacherRule = rules.find(t => 
                         t.subjects.includes(subject) && 
                         t.classes.includes(cls) &&
@@ -370,7 +369,7 @@ async function generateAIScheduleAndFillEmpty() {
 
     await saveData();
     renderVerticalSchedule();
-    alert(`تم التوليد وإملاء الحقول بنجاح لعدد (${placedLessons}) حصة استناداً إلى النصاب المحدد لكل مادة وقاعدة بيانات المعلمين المسندة!`);
+    alert(`تم التوليد وإملاء الحقول بنجاح لعدد (${placedLessons}) حصة استناداً إلى النصاب المعتمد للمواد وقاعدة بيانات المعلمين!`);
 }
 
 function resolveConflicts() {
@@ -584,6 +583,9 @@ function filterSubjectsByTeacher() {
     sel.innerHTML = '<option value="-">- فارغ -</option>';
     if (rule && rule.subjects) {
         rule.subjects.forEach(s => sel.innerHTML += `<option value="${s}">${s}</option>`);
+    } else {
+        const allSubjects = ["التربية الإسلامية", "اللغة العربية", "اللغة الإنكليزية", "الرياضيات", "العلوم", "الاجتماعيات", "فنية ونشيد", "رياضة"];
+        allSubjects.forEach(s => sel.innerHTML += `<option value="${s}">${s}</option>`);
     }
 }
 
@@ -625,16 +627,19 @@ async function saveData() {
     localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
     localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
     localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
+    localStorage.setItem(STORAGE_TEACHERS_LIST, JSON.stringify(teachers));
 }
 
 function loadData() {
     let lData = localStorage.getItem(STORAGE_LESSONS);
     let pData = localStorage.getItem(STORAGE_PATROL);
     let rData = localStorage.getItem(STORAGE_RULES);
+    let tList = localStorage.getItem(STORAGE_TEACHERS_LIST);
 
     lessonsData = lData ? JSON.parse(lData) : createEmptyLessonsStructure();
     patrolData = pData ? JSON.parse(pData) : createEmptyPatrolStructure();
     if (rData) TEACHER_RULES = JSON.parse(rData);
+    if (tList) teachers = JSON.parse(tList);
 }
 
 function openTeachersConfigModal() {
@@ -708,7 +713,7 @@ function saveTeacherRule() {
 
     saveData();
     renderTeacherRulesTable();
-    alert(`تم حفظ البيانات الخاصة بالمعلم (${teacherName}) بنجاح!`);
+    alert(`تم حفظ التكليف والتوزيع للمعلم (${teacherName}) بنجاح!`);
 }
 
 function clearTeacherForm() {
