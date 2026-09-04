@@ -466,7 +466,7 @@ window.initRealtimeSync = function() {
                 localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
                 localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
                 localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
-    localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
+                localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
 
                 renderVerticalSchedule();
             }
@@ -998,7 +998,6 @@ function toggleCustomTeacherInput(val) {
 }
 
 function renderSubjectChips(selectedSubjects = []) {
-    // التوافق مع البيانات القديمة: لم يعد الإدخال يعتمد على مربعات المواد.
     renderAssignmentSubjectOptions(selectedSubjects[0] || "");
 }
 
@@ -1017,6 +1016,7 @@ function renderAssignmentSubjectOptions(selectedSubjects = []) {
     sel.innerHTML = subjects.map(s => `<option value="${s}" ${selected.includes(s) ? "selected" : ""}>${s}</option>`).join("");
     renderLinkedClassCheckboxes();
 }
+
 function renderLinkedClassCheckboxes(selectedClasses = null) {
     const subject = document.getElementById("assignmentSubjectSelect")?.value;
     const container = document.getElementById("linkedClassCheckboxContainer");
