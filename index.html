@@ -229,8 +229,9 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
                     <button class="btn btn-save" style="width:auto; margin-top:5px;" onclick="addStaffMember()">+ إضافة للكادر</button>
                 </div>
                 <div>
-                    <label style="font-size: 13px; font-weight: 700;">عدد الحصص الفعلية الأسبوعية</label>
-                    <input type="number" id="inputTeacherQuota" class="form-control" value="0" min="0">
+                    <label style="font-size: 13px; font-weight: 700;">عدد الحصص الفعلي في الجدول</label>
+                    <input type="number" id="inputTeacherQuota" class="form-control" value="0" min="0" readonly title="يُحسب تلقائياً من الحصص المسندة في الجدول">
+                    <small style="display:block;margin-top:5px;color:#64748b;">هذا العدد يُحسب تلقائياً من الحصص الموجودة فعلياً في الجدول، ولا يُستخدم كنصاب أو حد أقصى.</small>
                 </div>
             </div>
             <div style="margin-bottom: 10px;">
@@ -267,7 +268,7 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
                         <th>المعلم</th>
                         <th>المواد</th>
                         <th>الصفوف والشُعب</th>
-                        <th>النصاب</th>
+                        <th>عدد الحصص الفعلي</th>
                         <th>إجراءات</th>
                     </tr>
                 </thead>
@@ -376,7 +377,7 @@ const DEFAULT_TEACHER_RULES = teachers.map((teacher, index) => {
     else if (index % 4 === 1) { assignedSubjects = ["الرياضيات", "العلوم"]; assignedClasses = ["الثالث - أ", "الثالث - ب", "الرابع - أ"]; }
     else if (index % 4 === 2) { assignedSubjects = ["اللغة الإنكليزية", "الاجتماعيات"]; assignedClasses = ["الخامس - أ", "الخامس - ب", "السادس - أ", "السادس - ب"]; }
     else { assignedSubjects = ["رياضة", "فنية ونشيد", "الأخلاقية"]; assignedClasses = ["الأول - ج", "الثاني - ج", "الثالث - ج", "الرابع - ج", "الخامس - ج", "السادس - ج"]; }
-    return { name: teacher, subjects: assignedSubjects, classes: assignedClasses, maxQuota: 16 };
+    return { name: teacher, subjects: assignedSubjects, classes: assignedClasses, maxQuota: 0 };
 });
 
 let TEACHER_RULES = [];
@@ -436,6 +437,45 @@ function updateUIState() {
         if (conflictBanner) conflictBanner.style.display = "none";
     }
     renderVerticalSchedule();
+}
+
+
+function isTeacherOffOnDay(teacherName, day) {
+    const n = String(teacherName || '');
+    if (n.includes('عقيل') && day === 'الأحد') return true;
+    if (n.includes('صادق') && day === 'الخميس') return true;
+    if (n.includes('نورا أسعد') && day === 'الثلاثاء') return true;
+    if (n.includes('علي طالب') && day === 'الخميس') return true;
+    return false;
+}
+
+function renderVerticalSchedule() {
+    const container = document.getElementById('scheduleContainer');
+    if (!container) return;
+    const source = currentView === 'lessons' ? lessonsData : patrolData;
+    const items = currentView === 'lessons' ? classes : patrolZones;
+    container.innerHTML = '';
+    items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'class-section-card' + (currentView === 'patrol' ? ' patrol-card' : '');
+        card.dataset.class = item;
+        let html = `<div class="class-header"><span>${item}</span><span>${currentView === 'lessons' ? 'جدول الدروس' : 'المراقبة'}</span></div><div class="table-responsive-wrapper"><table class="vertical-table"><thead><tr><th>اليوم</th>${[1,2,3,4].map(x=>`<th>الحصة ${x}</th>`).join('')}</tr></thead><tbody>`;
+        weekDays.forEach(day => {
+            html += `<tr><td class="day-title-col">${day}</td>`;
+            for (let slot=1; slot<=4; slot++) {
+                if (currentView === 'lessons') {
+                    const cell = source?.[day]?.[item]?.[slot] || {subject:'-',teacher:''};
+                    html += `<td class="cell-slot" onclick="openCellModal('${day}','${item}',${slot})"><div class="subject-title">${cell.subject || '-'}</div><div class="teacher-name">${cell.teacher || ''}</div></td>`;
+                } else {
+                    const ts = source?.[day]?.[item]?.teachers || [];
+                    html += `<td class="cell-slot" onclick="openPatrolModal('${day}','${item}')"><div class="teacher-name">${ts.join('<br>') || '-'}</div></td>`;
+                }
+            }
+            html += '</tr>';
+        });
+        card.innerHTML = html + '</tbody></table></div>';
+        container.appendChild(card);
+    });
 }
 
 window.initRealtimeSync = function() {
@@ -544,7 +584,7 @@ async function generateAISchedule() {
     const rules=TEACHER_RULES.filter(r=>r&&r.name), errors=[], load={}; rules.forEach(r=>load[r.name]=0); const oldLessons=lessonsData; lessonsData=createEmptyLessonsStructure();
     const demands=[]; classes.forEach(cls=>Object.entries(plan[cls.split(" - ")[0]]||{}).forEach(([subject,count])=>demands.push({cls,subject,count}))); demands.sort((a,b)=>b.count-a.count);
     for(const d of demands){ let rem=d.count; const candidates=rules.filter(r=>{ const subs=(r.subjects||[]).map(normalizeSubject); const linked=(r.subjectClasses&&r.subjectClasses[d.subject]) || r.classes || []; return subs.includes(normalizeSubject(d.subject)) && linked.includes(d.cls); }); if(!candidates.length){errors.push(`${d.cls}: لا يوجد معلم مرتبط بالمادة «${d.subject}».`);continue;}
-      while(rem>0){let done=false; for(const day of [...weekDays].sort((a,b)=>Object.values(lessonsData[a][d.cls]).filter(x=>x.subject===d.subject).length-Object.values(lessonsData[b][d.cls]).filter(x=>x.subject===d.subject).length)){if(Object.values(lessonsData[day][d.cls]).filter(x=>x.subject===d.subject).length>=2)continue; for(let slot=1;slot<=4;slot++){if(lessonsData[day][d.cls][slot].subject!=="-")continue; const r=candidates.filter(x=>!isTeacherOffOnDay(x.name,day)&&(Number(x.maxQuota)>0 ? load[x.name]<Number(x.maxQuota) : true)&&!Object.values(lessonsData[day]).some(c=>c[slot]?.teacher===x.name)).sort((a,b)=>load[a.name]-load[b.name])[0]; if(!r)continue; lessonsData[day][d.cls][slot]={subject:d.subject,teacher:r.name};load[r.name]++;rem--;done=true;break;}if(done)break;}if(!done)break;} if(rem)errors.push(`${d.cls}: تعذر إسناد ${rem} حصة من «${d.subject}»؛ راجع ربط المعلم بالشعبة أو النصاب.`); }
+      while(rem>0){let done=false; for(const day of [...weekDays].sort((a,b)=>Object.values(lessonsData[a][d.cls]).filter(x=>x.subject===d.subject).length-Object.values(lessonsData[b][d.cls]).filter(x=>x.subject===d.subject).length)){if(Object.values(lessonsData[day][d.cls]).filter(x=>x.subject===d.subject).length>=2)continue; for(let slot=1;slot<=4;slot++){if(lessonsData[day][d.cls][slot].subject!=="-")continue; const r=candidates.filter(x=>!isTeacherOffOnDay(x.name,day)&&!Object.values(lessonsData[day]).some(c=>c[slot]?.teacher===x.name)).sort((a,b)=>load[a.name]-load[b.name])[0]; if(!r)continue; lessonsData[day][d.cls][slot]={subject:d.subject,teacher:r.name};load[r.name]++;rem--;done=true;break;}if(done)break;}if(!done)break;} if(rem)errors.push(`${d.cls}: تعذر إسناد ${rem} حصة من «${d.subject}»؛ راجع ربط المعلم بالشعبة أو توفر حصص فارغة أو أيام المعلم.`); }
     await saveData(); renderVerticalSchedule(); alert(errors.length?`تم تكوين الجدول، لكن تعذر إسناد ${errors.reduce((n,e)=>n+(+(e.match(/تعذر إسناد (\d+)/)||[,0])[1]),0)} حصة.\n\nأسباب الخلل:\n- ${errors.join("\n- ")}`:"تم تكوين الجدول كاملاً دون تضارب.");
 }
 function resolveConflicts() {
@@ -579,6 +619,41 @@ function resolveConflicts() {
     alert(`✨ تم إصلاح ${resolvedCount} حالة تضارب بنجاح!`);
 }
 
+function getCellSuggestions(day, cls, slot) {
+    const usedTeachers = new Set(Object.values(lessonsData[day] || {}).map(c => c[slot]?.teacher).filter(Boolean));
+    const current = lessonsData[day]?.[cls]?.[slot] || {};
+    const grade = String(cls).split(' - ')[0];
+    const plan = {"الأول":{"التربية الإسلامية":2,"اللغة العربية":7,"اللغة الإنكليزية":2,"الرياضيات":5,"العلوم":2,"فنية ونشيد":1,"رياضة":1},"الثاني":{"التربية الإسلامية":2,"اللغة العربية":7,"اللغة الإنكليزية":2,"الرياضيات":5,"العلوم":2,"فنية ونشيد":1,"رياضة":1},"الثالث":{"التربية الإسلامية":2,"اللغة العربية":7,"اللغة الإنكليزية":2,"الرياضيات":5,"العلوم":2,"فنية ونشيد":1,"رياضة":1},"الرابع":{"التربية الإسلامية":2,"اللغة العربية":6,"اللغة الإنكليزية":2,"الرياضيات":5,"العلوم":2,"الاجتماعيات":1,"فنية ونشيد":1,"رياضة":1},"الخامس":{"التربية الإسلامية":2,"اللغة العربية":4,"اللغة الإنكليزية":3,"الرياضيات":4,"العلوم":2,"الاجتماعيات":3,"فنية ونشيد":1,"رياضة":1},"السادس":{"التربية الإسلامية":2,"اللغة العربية":4,"اللغة الإنكليزية":3,"الرياضيات":4,"العلوم":2,"الاجتماعيات":3,"فنية ونشيد":1,"رياضة":1}};
+    const actualSubjectCount = subject => weekDays.reduce((n,d) => n + Object.values(lessonsData[d] || {}).filter(c => c[slot] && c[slot].subject === subject).length, 0);
+    const teacherLoad = name => getTeacherActualLessonCount(name);
+    const subjects = Object.keys(plan[grade] || {});
+    const suggestions = [];
+    subjects.forEach(subject => {
+        const target = Number(plan[grade]?.[subject] || 0);
+        const alreadyInClass = weekDays.reduce((n,d) => n + Object.values(lessonsData[d]?.[cls] || {}).filter(c => c.subject === subject).length, 0);
+        const remaining = Math.max(0, target - alreadyInClass - (current.subject === subject ? 1 : 0));
+        TEACHER_RULES.filter(r => (r.subjects || []).includes(subject) && (r.classes || []).includes(cls) && !usedTeachers.has(r.name) && !isTeacherOffOnDay(r.name, day))
+          .forEach(r => suggestions.push({subject, teacher:r.name, remaining, load:teacherLoad(r.name)}));
+    });
+    suggestions.sort((a,b) => (b.remaining-a.remaining) || (a.load-b.load) || a.subject.localeCompare(b.subject));
+    return suggestions.slice(0, 12);
+}
+function showCellSuggestions(day, cls, slot) {
+    const box = document.getElementById('cellSuggestions'); if (!box) return;
+    const suggestions = getCellSuggestions(day, cls, slot);
+    box.innerHTML = suggestions.length ? '<b>اقتراحات مناسبة لهذه الخانة:</b><br>' + suggestions.map(x => `<button type="button" style="margin:4px;padding:5px;border:1px solid #cbd5e1;border-radius:6px;background:white;cursor:pointer" onclick="chooseCellSuggestion('${x.subject.replace(/'/g,"\\'")}','${x.teacher.replace(/'/g,"\\'")}')">${x.subject} — ${x.teacher} (حصصه الفعلية: ${x.load})</button>`).join('') : '<b>لا توجد اقتراحات متاحة:</b> راجع ربط المادة بالمعلم والشعبة أو يوم المعلم.';
+}
+function chooseCellSuggestion(subject, teacher) { document.getElementById('subjectSelect').value=subject; document.getElementById('teacherSelect').value=teacher; }
+function autoCorrectSchedule() {
+    let fixed=0;
+    weekDays.forEach(day => Object.keys(lessonsData[day]||{}).forEach(cls => Object.keys(lessonsData[day][cls]||{}).forEach(slot => {
+        const c=lessonsData[day][cls][slot]; if(!c) return;
+        if(c.teacher && Object.values(lessonsData[day]).filter(x=>x[slot]?.teacher===c.teacher).length>1){ c.teacher=''; fixed++; }
+        if(c.subject==='') c.subject='-';
+    })));
+    saveData(); renderVerticalSchedule(); alert(`تم التصحيح التلقائي وإصلاح ${fixed} تضارب.`);
+}
+
 function openCellModal(day, cls, slot) {
     if (!isAdmin) return;
     activeCellInfo = { type: 'lesson', day, cls, slot };
@@ -601,6 +676,7 @@ function openCellModal(day, cls, slot) {
     document.getElementById("cellModal").style.display = "flex";
     filterSubjectsByTeacher();
     subSel.value = cell.subject || "-";
+    showCellSuggestions(day, cls, slot);
 }
 
 function openPatrolModal(day, zone) {
@@ -686,7 +762,7 @@ function populateTeacherSelectOptions() {
 function onTeacherSelected(value) {
     toggleCustomTeacherInput(value);
     const rule = TEACHER_RULES.find(r => r.name === value);
-    document.getElementById("inputTeacherQuota").value = rule?.maxQuota || 0;
+    document.getElementById("inputTeacherQuota").value = getTeacherActualLessonCount(teacher);
     renderAssignmentSubjectOptions(rule?.subjects || []);
     renderLinkedClassCheckboxes();
 }
@@ -754,7 +830,7 @@ function addStaffMember() {
     const name = document.getElementById("inputNewStaffName").value.trim();
     if (!name) return alert("اكتب اسم المعلم أولاً.");
     if (!teachers.includes(name)) teachers.push(name);
-    if (!TEACHER_RULES.some(r => r.name === name)) TEACHER_RULES.push({ name, subjects: [], classes: [], maxQuota: 16 });
+    if (!TEACHER_RULES.some(r => r.name === name)) TEACHER_RULES.push({ name, subjects: [], classes: [], maxQuota: 0 });
     document.getElementById("inputNewStaffName").value = "";
     populateTeacherSelectOptions(); renderTeacherRulesTable(); saveData();
 }
@@ -792,7 +868,7 @@ function saveTeacherRule() {
     const subjectClasses = JSON.parse(JSON.stringify(oldRule.subjectClasses || {}));
     selectedSubjects.forEach(subject => { subjectClasses[subject] = selectedClasses; });
     const subjects = Object.keys(subjectClasses).filter(s => Array.isArray(subjectClasses[s]));
-    const ruleData = { name, subjects, classes: [...new Set(Object.values(subjectClasses).flat())], subjectClasses, maxQuota: parseInt(document.getElementById("inputTeacherQuota").value) || 16 };
+    const ruleData = { name, subjects, classes: [...new Set(Object.values(subjectClasses).flat())], subjectClasses, maxQuota: getTeacherActualLessonCount(name) };
     const idx = editIndex >= 0 ? editIndex : TEACHER_RULES.findIndex(r => r.name === name);
     if (idx >= 0) TEACHER_RULES[idx] = ruleData; else TEACHER_RULES.push(ruleData);
     if (!teachers.includes(name)) teachers.push(name);
@@ -814,7 +890,7 @@ function editTeacherRule(index) {
         toggleCustomTeacherInput("__custom__");
         document.getElementById("inputCustomTeacherName").value = rule.name;
     }
-    document.getElementById("inputTeacherQuota").value = rule.maxQuota || 0;
+    document.getElementById("inputTeacherQuota").value = getTeacherActualLessonCount(rule.name);
     renderAssignmentSubjectOptions(rule.subjects || []);
     renderLinkedClassCheckboxes();
 }
@@ -832,11 +908,16 @@ function clearTeacherForm() {
     document.getElementById("selectTeacherName").value = "";
     document.getElementById("inputCustomTeacherName").value = "";
     document.getElementById("inputCustomTeacherName").style.display = "none";
-    document.getElementById("inputTeacherQuota").value = "16";
+    document.getElementById("inputTeacherQuota").value = "0";
     window._editingRule = null;
     renderSubjectChips([]);
     renderAssignmentSubjectOptions("");
     renderLinkedClassCheckboxes([]);
+}
+
+function getTeacherActualLessonCount(teacherName) {
+    const counts = calculateTeacherAllocatedQuota();
+    return Number(counts[teacherName] || 0);
 }
 
 function renderTeacherRulesTable() {
@@ -850,7 +931,7 @@ function renderTeacherRulesTable() {
             <td><strong>${rule.name}</strong></td>
             <td><small>${subs}</small></td>
             <td><small>${cls}</small></td>
-            <td><b>${rule.maxQuota || 16}</b></td>
+            <td><b>${getTeacherActualLessonCount(rule.name)}</b></td>
             <td>
                 <button class="btn btn-fix" style="padding: 3px 8px; font-size: 11px; width: auto;" onclick="editTeacherRule(${idx})">تعديل</button>
                 <button class="btn btn-danger" style="padding: 3px 8px; font-size: 11px; width: auto;" onclick="deleteTeacherRule(${idx})">حذف</button>
