@@ -15,12 +15,12 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 .app-bar-header { display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 10px; }
 .role-badge { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
 .role-admin { background-color: #f59e0b; color: #000; }
-.role-viewer { background-color: #64748b; color: #fff; }
+.role-teacher { background-color: #3b82f6; color: #fff; }
+.role-visitor { background-color: #64748b; color: #fff; }
 
 .btn-group { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; justify-content: flex-start; }
 .btn { padding: 8px 14px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; transition: all 0.2s; color: white; font-size: 13.5px; display: inline-flex; align-items: center; gap: 5px; justify-content: center; }
 .btn-save { background-color: var(--success-color); }
-.btn-ai { background-color: #9333ea; }
 .btn-manage { background-color: #0d9488; }
 .btn-fix { background-color: #d97706; }
 .btn-notify { background-color: #ea580c; }
@@ -39,9 +39,6 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 .report-title { font-size: 16px; font-weight: 800; color: var(--primary-color); margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; flex-wrap: wrap; gap: 5px; }
 .admin-badge-tag { background-color: #fef3c7; color: #b45309; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 800; }
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 15px; }
-.stat-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; text-align: center; }
-.stat-number { font-size: 22px; font-weight: 900; color: var(--accent-color); }
-.stat-label { font-size: 12.5px; font-weight: 700; color: #64748b; }
 .report-table-wrapper { max-height: 300px; overflow-y: auto; overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 10px; }
 .report-table { width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: right; min-width: 500px; }
 .report-table th, .report-table td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; }
@@ -51,7 +48,7 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 .vertical-container { display: flex; flex-direction: column; gap: 20px; }
 
 /* الكروت والتصميم الخاص بكل صف */
-.class-section-card { border-radius: 10px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08); overflow: hidden; background: #fff; }
+.class-section-card { border-radius: 10px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08); overflow: hidden; background: #fff; page-break-after: always; break-after: page; }
 .table-responsive-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
 .class-section-card[data-class^="الأول"] { border-top: 5px solid #0284c7; background-color: #e0f2fe; }
@@ -102,12 +99,9 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 .vertical-table th { font-weight: 800; font-size: 14.5px; }
 .day-title-col { font-weight: 900; font-size: 15px; width: 100px; min-width: 90px; }
 .subject-title { font-weight: 800; font-size: 14px; margin-bottom: 2px; }
-.teacher-name { font-weight: 700; font-size: 13px; }
-.quota-badge { display: block; font-size: 11px; background: #dbeafe; color: #1e40af; padding: 2px 6px; border-radius: 10px; margin-top: 3px; font-weight: 800; }
+.teacher-name { font-weight: 700; font-size: 13px; color: #1e3a8a; }
 td.cell-slot { cursor: pointer; transition: filter 0.2s ease; }
 td.cell-slot:hover { filter: brightness(0.9) !important; }
-td.cell-disabled { cursor: not-allowed !important; opacity: 0.85; }
-td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(--danger-color) !important; box-shadow: inset 0 0 5px rgba(239,68,68,0.5); }
 
 /* النوافذ المنبثقة المتجاوبة */
 .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 10px; }
@@ -116,7 +110,7 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
 .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; max-height: 120px; overflow-y: auto; border: 1px solid #e2e8f0; padding: 8px; border-radius: 6px; }
 .checkbox-item { font-size: 12.5px; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 4px; }
 
-/* قواعد التجاوب مع الهواتف الذكية */
+/* قواعد التجاوب والطباعة */
 @media (max-width: 768px) {
   body { padding: 10px; }
   .app-bar { padding: 12px 15px; }
@@ -126,7 +120,18 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
   .grid-2col-mobile { grid-template-columns: 1fr !important; }
 }
 
-@media print { .app-bar, .navigation-tabs, .btn-group, .btn-auth, .quota-badge { display: none !important; } body { padding: 0; background: white; } .class-section-card, .report-card { page-break-inside: avoid; margin-bottom: 15px; } .vertical-table th, .day-title-col, td.cell-slot { -webkit-print-color-adjust: exact; } }
+@media print { 
+  .app-bar, .navigation-tabs, .btn-group, .btn-auth, .conflict-panel, .report-card { display: none !important; } 
+  body { padding: 0; background: white; } 
+  .class-section-card { 
+    page-break-after: always !important; 
+    break-after: page !important; 
+    margin-bottom: 0 !important; 
+    border: 2px solid #000 !important;
+    box-shadow: none !important;
+  } 
+  .vertical-table th, .day-title-col, td.cell-slot { -webkit-print-color-adjust: exact; } 
+}
 </style>
 </head>
 <body>
@@ -134,17 +139,16 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
 <div class="app-bar">
     <div class="app-bar-header">
         <h2 style="margin: 0; font-size: 18px; font-weight: 800;">نظام إدارة الجدول المباشر والمراقبة الميدانية - مدرسة وادي العين الابتدائية للبنين</h2>
-        <span id="roleBadge" class="role-badge role-viewer">المود: مشاهد فقط</span>
+        <span id="roleBadge" class="role-badge role-visitor">المود: زائر</span>
     </div>
     <div style="width: 100%; display: flex; justify-content: flex-end;">
-        <button class="btn btn-auth" style="width: auto;" onclick="toggleAuth()">🔑 تغيير الصلاحية</button>
+        <button class="btn btn-auth" style="width: auto;" onclick="openAuthModal()">🔑 تسجيل الدخول / تغيير الصلاحية</button>
     </div>
     <div class="btn-group">
         <button class="btn btn-manage admin-only" onclick="openTeachersConfigModal()">👨‍🏫 إدارة بيانات وقواعد المعلمين</button>
-        <button class="btn btn-ai admin-only" onclick="generateAISchedule()">🤖 توليد من قاعدة البيانات</button>
         <button class="btn btn-fix admin-only" onclick="resolveConflicts()">✨ إصلاح التضارب</button>
         <button class="btn btn-notify admin-only" onclick="sendGlobalNotification()">🔔 إرسال الإشعارات للكل</button>
-        <button class="btn btn-print" onclick="window.print()">🖨️ طباعة الجدول</button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ طباعة الجدول (كل شعبة بصفحة)</button>
         <button class="btn btn-danger admin-only" onclick="resetAllData()">🔄 تفريغ الجدول</button>
     </div>
 </div>
@@ -174,6 +178,30 @@ td.cell-conflict { background-color: #fee2e2 !important; border: 2px dashed var(
 </div>
 
 <div id="scheduleContainer" class="vertical-container"></div>
+
+<!-- مودال اختيار وتحديد الصلاحيات -->
+<div id="authModal" class="modal-overlay">
+    <div class="modal-content" style="width: 400px;">
+        <h3 style="font-weight: 800; margin-top:0;">تسجيل الدخول للنظام</h3>
+        <p style="font-size: 13px; color: #64748b;">سيتم حفظ تسجيل الدخول الخاص بك تلقائياً على هذا الجهاز.</p>
+        <div style="margin-bottom: 12px;">
+            <label style="font-weight: 700;">نوع الحساب:</label>
+            <select id="authRoleSelect" class="form-control" onchange="togglePinInput()">
+                <option value="visitor">زائر (عرض المواد فقط بدون اسم المعلم)</option>
+                <option value="teacher">معلم (عرض المادة مع أسماء المعلمين)</option>
+                <option value="admin">مدير النظام (صلاحيات كاملة وتعديل)</option>
+            </select>
+        </div>
+        <div id="pinGroup" style="margin-bottom: 12px; display: none;">
+            <label style="font-weight: 700;">رمز الدخول (PIN):</label>
+            <input type="password" id="authPinInput" class="form-control" placeholder="أدخل الرمز السرّي">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+            <button class="btn btn-save" style="width: auto;" onclick="processAuthLogin()">دخول</button>
+            <button class="btn btn-danger" style="width: auto;" onclick="closeAuthModal()">إلغاء</button>
+        </div>
+    </div>
+</div>
 
 <!-- مودال تعديل خلايا الجدول -->
 <div id="cellModal" class="modal-overlay">
@@ -314,9 +342,13 @@ const STORAGE_CONFIG = 'SCHOOL_CONFIG_PERMANENT_V1';
 const LEGACY_KEYS = { lessons: ['SCHEDULE_LESSONS_PERMANENT_V6','SCHEDULE_LESSONS_PERMANENT_V5'], patrol: ['SCHEDULE_PATROL_PERMANENT_V6','SCHEDULE_PATROL_PERMANENT_V5'], rules: ['TEACHERS_RULES_PERMANENT_V6','TEACHERS_RULES_PERMANENT_V5'], config: ['SCHOOL_CONFIG_PERMANENT_V1'] };
 
 function readStored(keys){ for(const k of keys){ const v=localStorage.getItem(k); if(v!==null) return v; } return null; }
-const ADMIN_PIN = "19801234";
 
-let isAdmin = localStorage.getItem("SCHOOL_ADMIN_SESSION") === "1";
+const ADMIN_PIN = "19801234";
+const TEACHER_PIN = "19801980";
+
+// الرمز والنظام المعتمد للصلاحيات (admin, teacher, visitor)
+let currentRole = localStorage.getItem("USER_ROLE_SAVED") || "visitor";
+
 let currentView = 'lessons';
 const weekDays = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس"];
 let classes = [
@@ -363,7 +395,6 @@ let teachers = [
   "أ. قاسم محمود"
 ];
 
-let schoolConfig = { classes: [...classes], teachers: [...teachers] };
 let TEACHER_RULES = [];
 let lessonsData = {}, patrolData = {}, activeCellInfo = null;
 
@@ -391,17 +422,55 @@ function calculateTeacherAllocatedQuota() {
 }
 
 function sendGlobalNotification() {
-    if (!isAdmin) return;
+    if (currentRole !== 'admin') return;
     alert(`📢 تم إرسال إشعار بالتغييرات والتحديثات الجديدة للجدول لكافة الكادر التعليمي (${getTeachersList().length} معلم) بنجاح!`);
 }
 
-function toggleAuth() {
-    if (isAdmin) { isAdmin = false; localStorage.removeItem("SCHOOL_ADMIN_SESSION"); alert("تم التحويل إلى وضع المشاهد."); }
-    else {
-        if (prompt("أدخل كلمة مرور الإدارة لتفعيل التعديل والإحصائيات:") === ADMIN_PIN) {
-            isAdmin = true; localStorage.setItem("SCHOOL_ADMIN_SESSION", "1"); alert("تم تفعيل صلاحيات الإدارة الكاملة!");
-        } else alert("كلمة المرور غير صحيحة!");
+function openAuthModal() {
+    document.getElementById("authRoleSelect").value = currentRole;
+    togglePinInput();
+    document.getElementById("authModal").style.display = "flex";
+}
+
+function closeAuthModal() {
+    document.getElementById("authModal").style.display = "none";
+}
+
+function togglePinInput() {
+    const role = document.getElementById("authRoleSelect").value;
+    const pinGroup = document.getElementById("pinGroup");
+    if (role === "admin" || role === "teacher") {
+        pinGroup.style.display = "block";
+    } else {
+        pinGroup.style.display = "none";
     }
+}
+
+function processAuthLogin() {
+    const role = document.getElementById("authRoleSelect").value;
+    const pin = document.getElementById("authPinInput").value.trim();
+
+    if (role === "admin") {
+        if (pin === ADMIN_PIN) {
+            currentRole = "admin";
+            alert("تم تسجيل الدخول كـ مدير النظام بنجاح!");
+        } else {
+            return alert("رمز المدير غير صحيح!");
+        }
+    } else if (role === "teacher") {
+        if (pin === TEACHER_PIN) {
+            currentRole = "teacher";
+            alert("تم تسجيل الدخول كـ معلم بنجاح!");
+        } else {
+            return alert("رمز المعلم غير صحيح!");
+        }
+    } else {
+        currentRole = "visitor";
+        alert("تم التعيين كـ زائر بنجاح.");
+    }
+
+    localStorage.setItem("USER_ROLE_SAVED", currentRole);
+    closeAuthModal();
     updateUIState();
 }
 
@@ -409,27 +478,24 @@ function updateUIState() {
     const badge = document.getElementById("roleBadge");
     const reportCard = document.getElementById("adminReportCard");
     const conflictBanner = document.getElementById("conflictBanner");
-    if (isAdmin) {
+
+    if (currentRole === "admin") {
         badge.innerText = "المود: مدير النظام (إدارة كاملة)"; badge.className = "role-badge role-admin";
         document.querySelectorAll(".admin-only").forEach(el => el.style.display = "inline-flex");
         reportCard.style.display = "block";
         if (conflictBanner) conflictBanner.style.display = "block";
+    } else if (currentRole === "teacher") {
+        badge.innerText = "المود: معلم (عرض الجدول والطباعة)"; badge.className = "role-badge role-teacher";
+        document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
+        reportCard.style.display = "none";
+        if (conflictBanner) conflictBanner.style.display = "none";
     } else {
-        badge.innerText = "المود: مشاهد (عرض وطباعة فقط)"; badge.className = "role-badge role-viewer";
+        badge.innerText = "المود: زائر (عرض المواد والطباعة)"; badge.className = "role-badge role-visitor";
         document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
         reportCard.style.display = "none";
         if (conflictBanner) conflictBanner.style.display = "none";
     }
     renderVerticalSchedule();
-}
-
-function isTeacherOffOnDay(teacherName, day) {
-    const n = String(teacherName || '');
-    if (n.includes('عقيل') && day === 'الأحد') return true;
-    if (n.includes('صادق') && day === 'الخميس') return true;
-    if (n.includes('نورا أسعد') && day === 'الثلاثاء') return true;
-    if (n.includes('علي طالب') && day === 'الخميس') return true;
-    return false;
 }
 
 function renderVerticalSchedule() {
@@ -438,20 +504,28 @@ function renderVerticalSchedule() {
     const source = currentView === 'lessons' ? lessonsData : patrolData;
     const items = currentView === 'lessons' ? classes : patrolZones;
     container.innerHTML = '';
+    
     items.forEach(item => {
         const card = document.createElement('div');
         card.className = 'class-section-card' + (currentView === 'patrol' ? ' patrol-card' : '');
         card.dataset.class = item;
         let html = `<div class="class-header"><span>${item}</span><span>${currentView === 'lessons' ? 'جدول الدروس' : 'المراقبة'}</span></div><div class="table-responsive-wrapper"><table class="vertical-table"><thead><tr><th>اليوم</th>${[1,2,3,4].map(x=>`<th>الحصة ${x}</th>`).join('')}</tr></thead><tbody>`;
+        
         weekDays.forEach(day => {
             html += `<tr><td class="day-title-col">${day}</td>`;
             for (let slot=1; slot<=4; slot++) {
                 if (currentView === 'lessons') {
                     const cell = source?.[day]?.[item]?.[slot] || {subject:'-',teacher:''};
-                    html += `<td class="cell-slot" onclick="openCellModal('${day}','${item}',${slot})"><div class="subject-title">${cell.subject || '-'}</div><div class="teacher-name">${cell.teacher || ''}</div></td>`;
+                    const showTeacher = (currentRole === 'admin' || currentRole === 'teacher');
+                    const teacherDisplay = showTeacher ? (cell.teacher || '') : '';
+                    
+                    html += `<td class="cell-slot" onclick="openCellModal('${day}','${item}',${slot})"><div class="subject-title">${cell.subject || '-'}</div>${teacherDisplay ? `<div class="teacher-name">${teacherDisplay}</div>` : ''}</td>`;
                 } else {
                     const ts = source?.[day]?.[item]?.teachers || [];
-                    html += `<td class="cell-slot" onclick="openPatrolModal('${day}','${item}')"><div class="teacher-name">${ts.join('<br>') || '-'}</div></td>`;
+                    const showTeacher = (currentRole === 'admin' || currentRole === 'teacher');
+                    const teachersDisplay = showTeacher ? ts.join('<br>') : 'محدد';
+                    
+                    html += `<td class="cell-slot" onclick="openPatrolModal('${day}','${item}')"><div class="teacher-name">${teachersDisplay || '-'}</div></td>`;
                 }
             }
             html += '</tr>';
@@ -560,48 +634,8 @@ function switchView(view) {
 
 function isPrimaryClass(cls) { return cls.startsWith("الأول") || cls.startsWith("الثاني") || cls.startsWith("الثالث"); }
 
-async function generateAISchedule() {
-    if (!isAdmin) { alert("يجب الدخول بوضع المدير أولاً لتوليد الجدول."); return; }
-    const plan={"الأول":{"التربية الإسلامية":2,"اللغة العربية":7,"اللغة الإنكليزية":2,"الرياضيات":5,"العلوم":2,"فنية ونشيد":1,"رياضة":1},"الثاني":{"التربية الإسلامية":2,"اللغة العربية":7,"اللغة الإنكليزية":2,"الرياضيات":5,"العلوم":2,"فنية ونشيد":1,"رياضة":1},"الثالث":{"التربية الإسلامية":2,"اللغة العربية":7,"اللغة الإنكليزية":2,"الرياضيات":5,"العلوم":2,"فنية ونشيد":1,"رياضة":1},"الرابع":{"التربية الإسلامية":2,"اللغة العربية":6,"اللغة الإنكليزية":2,"الرياضيات":5,"العلوم":2,"الاجتماعيات":1,"فنية ونشيد":1,"رياضة":1},"الخامس":{"التربية الإسلامية":2,"اللغة العربية":4,"اللغة الإنكليزية":3,"الرياضيات":4,"العلوم":2,"الاجتماعيات":3,"فنية ونشيد":1,"رياضة":1},"السادس":{"التربية الإسلامية":2,"اللغة العربية":4,"اللغة الإنكليزية":3,"الرياضيات":4,"العلوم":2,"الاجتماعيات":3,"فنية ونشيد":1,"رياضة":1}};
-    const normalizeSubject = s => ({"إسلامية":"التربية الإسلامية","اسلامية":"التربية الإسلامية","رياضيات":"الرياضيات","علوم":"العلوم","التربية الفنية":"فنية ونشيد","التربية الرياضية":"رياضة"}[String(s||"").trim()] || String(s||"").trim());
-    const rules=TEACHER_RULES.filter(r=>r&&r.name), errors=[], load={}; rules.forEach(r=>load[r.name]=0); lessonsData=createEmptyLessonsStructure();
-    const demands=[]; classes.forEach(cls=>Object.entries(plan[cls.split(" - ")[0]]||{}).forEach(([subject,count])=>demands.push({cls,subject,count}))); demands.sort((a,b)=>b.count-a.count);
-    
-    for(const d of demands){ 
-      let rem=d.count; 
-      const candidates=rules.filter(r=>{ 
-        const subs=(r.subjects||[]).map(normalizeSubject); 
-        const linked=(r.subjectClasses&&r.subjectClasses[d.subject]) || r.classes || []; 
-        return subs.includes(normalizeSubject(d.subject)) && linked.includes(d.cls); 
-      }); 
-      if(!candidates.length){errors.push(`${d.cls}: لا يوجد معلم مرتبط بالمادة «${d.subject}».`);continue;}
-      while(rem>0){
-        let done=false; 
-        for(const day of [...weekDays].sort((a,b)=>Object.values(lessonsData[a][d.cls]).filter(x=>x.subject===d.subject).length-Object.values(lessonsData[b][d.cls]).filter(x=>x.subject===d.subject).length)){
-          if(Object.values(lessonsData[day][d.cls]).filter(x=>x.subject===d.subject).length>=2)continue; 
-          for(let slot=1;slot<=4;slot++){
-            if(lessonsData[day][d.cls][slot].subject!=="-")continue; 
-            const r=candidates.filter(x=>!isTeacherOffOnDay(x.name,day)&&!Object.values(lessonsData[day]).some(c=>c[slot]?.teacher===x.name)).sort((a,b)=>load[a.name]-load[b.name])[0]; 
-            if(!r)continue; 
-            lessonsData[day][d.cls][slot]={subject:d.subject,teacher:r.name};
-            load[r.name]++;
-            rem--;
-            done=true;
-            break;
-          }
-          if(done)break;
-        }
-        if(!done)break;
-      } 
-      if(rem)errors.push(`${d.cls}: تعذر إسناد ${rem} حصة من «${d.subject}»؛ راجع ربط المعلم بالشعبة أو الأيام المتاحة.`); 
-    }
-    await saveData(); 
-    renderVerticalSchedule(); 
-    alert(errors.length?`تم تكوين الجدول مع بعض التنبيهات:\n\n- ${errors.join("\n- ")}`:"تم تكوين الجدول كاملاً وبلا أي تضارب!");
-}
-
 function resolveConflicts() {
-    if (!isAdmin) return;
+    if (currentRole !== 'admin') return;
     let resolvedCount = 0;
     if (currentView === 'lessons') {
         weekDays.forEach(day => {
@@ -632,35 +666,8 @@ function resolveConflicts() {
     alert(`✨ تم إصلاح ${resolvedCount} حالة تضارب بنجاح!`);
 }
 
-function getCellSuggestions(day, cls, slot) {
-    const usedTeachers = new Set(Object.values(lessonsData[day] || {}).map(c => c[slot]?.teacher).filter(Boolean));
-    const current = lessonsData[day]?.[cls]?.[slot] || {};
-    const grade = String(cls).split(' - ')[0];
-    const plan = {"الأول":{"التربية الإسلامية":2,"اللغة العربية":7,"اللغة الإنكليزية":2,"الرياضيات":5,"العلوم":2,"فنية ونشيد":1,"رياضة":1},"الثاني":{"التربية الإسلامية":2,"اللغة العربية":7,"اللغة الإنكليزية":2,"الرياضيات":5,"العلوم":2,"فنية ونشيد":1,"رياضة":1},"الثالث":{"التربية الإسلامية":2,"اللغة العربية":7,"اللغة الإنكليزية":2,"الرياضيات":5,"العلوم":2,"فنية ونشيد":1,"رياضة":1},"الرابع":{"التربية الإسلامية":2,"اللغة العربية":6,"اللغة الإنكليزية":2,"الرياضيات":5,"العلوم":2,"الاجتماعيات":1,"فنية ونشيد":1,"رياضة":1},"الخامس":{"التربية الإسلامية":2,"اللغة العربية":4,"اللغة الإنكليزية":3,"الرياضيات":4,"العلوم":2,"الاجتماعيات":3,"فنية ونشيد":1,"رياضة":1},"السادس":{"التربية الإسلامية":2,"اللغة العربية":4,"اللغة الإنكليزية":3,"الرياضيات":4,"العلوم":2,"الاجتماعيات":3,"فنية ونشيد":1,"رياضة":1}};
-    const teacherLoad = name => getTeacherActualLessonCount(name);
-    const subjects = Object.keys(plan[grade] || {});
-    const suggestions = [];
-    subjects.forEach(subject => {
-        const target = Number(plan[grade]?.[subject] || 0);
-        const alreadyInClass = weekDays.reduce((n,d) => n + Object.values(lessonsData[d]?.[cls] || {}).filter(c => c.subject === subject).length, 0);
-        const remaining = Math.max(0, target - alreadyInClass - (current.subject === subject ? 1 : 0));
-        TEACHER_RULES.filter(r => (r.subjects || []).includes(subject) && (r.classes || []).includes(cls) && !usedTeachers.has(r.name) && !isTeacherOffOnDay(r.name, day))
-          .forEach(r => suggestions.push({subject, teacher:r.name, remaining, load:teacherLoad(r.name)}));
-    });
-    suggestions.sort((a,b) => (b.remaining-a.remaining) || (a.load-b.load) || a.subject.localeCompare(b.subject));
-    return suggestions.slice(0, 10);
-}
-
-function showCellSuggestions(day, cls, slot) {
-    const box = document.getElementById('cellSuggestions'); if (!box) return;
-    const suggestions = getCellSuggestions(day, cls, slot);
-    box.innerHTML = suggestions.length ? '<b>💡 اقتراحات مناسبة للخانة:</b><br>' + suggestions.map(x => `<button type="button" style="margin:3px;padding:4px 8px;border:1px solid #cbd5e1;border-radius:6px;background:white;cursor:pointer;font-size:12px;" onclick="chooseCellSuggestion('${x.subject.replace(/'/g,"\\'")}','${x.teacher.replace(/'/g,"\\'")}')">${x.subject} — ${x.teacher} (${x.load} حصة)</button>`).join('') : '<b>لا توجد اقتراحات مباشرة:</b> تحقق من ربط المعلم بالشعبة والمادة أو تفرغه.';
-}
-
-function chooseCellSuggestion(subject, teacher) { document.getElementById('subjectSelect').value=subject; document.getElementById('teacherSelect').value=teacher; }
-
 function openCellModal(day, cls, slot) {
-    if (!isAdmin) return;
+    if (currentRole !== 'admin') return;
     activeCellInfo = { type: 'lesson', day, cls, slot };
     document.getElementById("modalTitle").innerText = `تعديل درس: ${cls} - ${day} (الدرس ${slot})`;
     document.getElementById("lessonFormGroup").style.display = "block";
@@ -681,11 +688,10 @@ function openCellModal(day, cls, slot) {
     document.getElementById("cellModal").style.display = "flex";
     filterSubjectsByTeacher();
     subSel.value = cell.subject || "-";
-    showCellSuggestions(day, cls, slot);
 }
 
 function openPatrolModal(day, zone) {
-    if (!isAdmin) return;
+    if (currentRole !== 'admin') return;
     activeCellInfo = { type: 'patrol', day, zone };
     document.getElementById("modalTitle").innerText = `تعديل المراقبين: ${zone} - ${day}`;
     document.getElementById("lessonFormGroup").style.display = "none";
@@ -744,7 +750,7 @@ function applyCellEdit() {
 }
 
 function openTeachersConfigModal() {
-    if (!isAdmin) return;
+    if (currentRole !== 'admin') return;
     renderTeacherRulesTable();
     populateTeacherSelectOptions();
     renderAssignmentSubjectOptions("");
@@ -816,7 +822,7 @@ function filterSubjectsByTeacher() {
 }
 
 function addStaffMember() {
-    if (!isAdmin) return;
+    if (currentRole !== 'admin') return;
     const name = document.getElementById("inputNewStaffName").value.trim();
     if (!name) return alert("اكتب اسم المعلم أولاً.");
     if (!teachers.includes(name)) teachers.push(name);
@@ -826,7 +832,7 @@ function addStaffMember() {
 }
 
 function addClassSection() {
-    if (!isAdmin) return;
+    if (currentRole !== 'admin') return;
     const name = document.getElementById("inputNewClassName").value.trim();
     if (!name) return alert("اكتب اسم الشعبة أولاً.");
     if (!classes.includes(name)) {
@@ -842,7 +848,7 @@ function addClassSection() {
 }
 
 function saveTeacherRule() {
-    if (!isAdmin) return;
+    if (currentRole !== 'admin') return;
     const editIndex = parseInt(document.getElementById("editTeacherIndex").value);
     const selName = document.getElementById("selectTeacherName").value;
     const customName = document.getElementById("inputCustomTeacherName").value.trim();
@@ -930,7 +936,7 @@ function renderTeacherRulesTable() {
 }
 
 function resetAllData() {
-    if (!isAdmin) return;
+    if (currentRole !== 'admin') return;
     if (confirm("⚠️ هل تريد تفريغ جدول الدروس حصراً؟ لن يتم حذف أسماء المعلمين ولا الشعب أو ارتباطاتهم.")) {
         lessonsData = createEmptyLessonsStructure();
         patrolData = createEmptyPatrolStructure();
