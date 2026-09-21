@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>نظام إدارة الجدول المباشر والمراقبة الميدانية - مدرسة وادي العين الابتدائية للبنين</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<!-- مكتبة توليد رمز QR المباشر -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
 :root { --primary-color: #1e293b; --accent-color: #2563eb; --bg-color: #f1f5f9; --border-color: #cbd5e1; --danger-color: #ef4444; --success-color: #16a34a; }
@@ -147,35 +145,62 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
   .modal-content { padding: 15px; }
 }
 
-/* 🖨️ قواعد الطباعة الأفقية حصراً والمصممة لملء الصفحة بالكامل */
+/* 🖨️ قواعد الطباعة الأفقية المحسنة مع احتواء كل شعبة في صفحة مستقلة دون عبور */
 @page {
     size: A4 landscape;
-    margin: 4mm;
+    margin: 0;
 }
 @media print { 
-  .app-bar, .navigation-tabs, .btn-group, .btn-auth, .conflict-panel, .report-card { display: none !important; } 
-  body { padding: 0; background: white; margin: 0; } 
-  
-  /* إبقاء قسم الـ QR ظاهراً ومحسناً للطباعة إذا رغبت بطباعة الصفحة الأولى */
-  .wall-qr-section { border: 2px solid #000; margin-bottom: 10px; page-break-after: avoid; }
-  
-  .vertical-container { gap: 0 !important; }
-  .class-section-card { 
-    page-break-after: always !important; 
-    break-after: page !important; 
-    margin: 0 !important;
-    width: 100% !important;
-    height: 98vh !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    border: 2px solid #000 !important;
-    box-shadow: none !important;
-    box-sizing: border-box !important;
+  .app-bar, .navigation-tabs, .btn-group, .btn-auth, .conflict-panel, .report-card, .wall-qr-section { 
+      display: none !important; 
   } 
-  .table-responsive-wrapper { flex-grow: 1; display: flex; }
-  .vertical-table { height: 100% !important; width: 100% !important; }
-  .vertical-table th, .day-title-col, td.cell-slot { -webkit-print-color-adjust: exact; print-color-adjust: exact; } 
+  html, body { 
+      width: 100%;
+      height: 100%;
+      margin: 0 !important; 
+      padding: 0 !important; 
+      background: white; 
+      overflow: hidden;
+  } 
+  
+  .vertical-container { 
+      display: block !important; 
+      gap: 0 !important; 
+  }
+
+  .class-section-card { 
+      page-break-before: always !important;
+      page-break-after: always !important; 
+      break-after: page !important; 
+      break-inside: avoid !important;
+      margin: 0 !important;
+      padding: 5mm !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: flex-start !important;
+      border: 2px solid #000 !important;
+      box-shadow: none !important;
+      box-sizing: border-box !important;
+  } 
+
+  .table-responsive-wrapper { 
+      flex-grow: 1 !important; 
+      display: flex !important; 
+      height: calc(100vh - 60px) !important;
+  }
+
+  .vertical-table { 
+      height: 100% !important; 
+      width: 100% !important; 
+      border-collapse: collapse !important;
+  }
+
+  .vertical-table th, .day-title-col, td.cell-slot { 
+      -webkit-print-color-adjust: exact; 
+      print-color-adjust: exact; 
+  } 
   .vertical-table th { font-size: 16px !important; }
   .subject-title { font-size: 16px !important; }
   .teacher-name { font-size: 14px !important; }
@@ -184,14 +209,14 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
 </head>
 <body>
 
-<!-- قسم رمز QR المخصص للتثبيت على الجدار للفتح الفوري بدون نت -->
+<!-- قسم رمز QR المخصص للتثبيت على الجدار مع الصورة المحددة -->
 <div class="wall-qr-section">
     <div class="wall-qr-info">
         <h3>📱 رمز الوصول المباشر للجدول (صالح للطباعة والتعليق على الجدار)</h3>
         <p>بمجرد مسح هذا الرمز بكاميرا الهاتف، سيفتح الجدول المحدث فوراً ويعمل في حالة توفر الإنترنت أو **بدون إنترنت إطلاقاً (Offline)**.</p>
     </div>
     <div class="qr-display-box">
-        <div id="staticWallQRCode"></div>
+        <img src="qr qr code.jpeg" alt="QR Code" style="width: 110px; height: 110px; object-fit: contain;">
         <span style="font-size: 11px; font-weight: 800; color: #1e3a8a; margin-top: 4px;">مسح للفتح المباشر</span>
     </div>
 </div>
@@ -207,7 +232,7 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
     <div class="btn-group">
         <button class="btn btn-manage admin-only" onclick="openTeachersConfigModal()">👨‍🏫 إدارة بيانات وقواعد المعلمين</button>
         <button class="btn btn-notify admin-only" onclick="sendGlobalNotification()">🔔 إرسال الإشعارات الشاملة</button>
-        <button class="btn btn-print" onclick="window.print()">🖨️ طباعة أفقي (ملء الصفحة بالكامل)</button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ طباعة أفقي (كل شعبة في صفحة)</button>
         <button class="btn btn-danger admin-only" onclick="resetAllData()">🔄 تفريغ الجدول</button>
     </div>
 </div>
@@ -411,30 +436,6 @@ let teachers = [
 let TEACHER_RULES = [];
 let lessonsData = {}, patrolData = {}, activeCellInfo = null;
 
-/* توليد وتحديث رمز الـ QR المباشر الموجود في أعلى الصفحة مع أحدث نسخة بيانات */
-function generateLiveWallQR() {
-    const qrContainer = document.getElementById("staticWallQRCode");
-    if (!qrContainer) return;
-    qrContainer.innerHTML = "";
-
-    // بناء كود الصفحة الكامل المحدث لحظياً بالبيانات المخزنة
-    const fullHtmlData = document.documentElement.outerHTML;
-    const blob = new Blob([fullHtmlData], { type: 'text/html' });
-    const reader = new FileReader();
-    
-    reader.onload = function(e) {
-        new QRCode(qrContainer, {
-            text: e.target.result,
-            width: 110,
-            height: 110,
-            colorDark : "#0f172a",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.L
-        });
-    };
-    reader.readAsDataURL(blob);
-}
-
 function getTeachersList() { 
     if (TEACHER_RULES && TEACHER_RULES.length > 0) {
         return TEACHER_RULES.map(t => t.name).filter(name => name && name.trim() !== "");
@@ -617,7 +618,6 @@ function initData() {
     renderVerticalSchedule();
     detectConflicts();
     updateUIState();
-    generateLiveWallQR();
 }
 
 function createEmptyLessonsStructure() {
@@ -641,13 +641,11 @@ function createEmptyPatrolStructure() {
     return struct;
 }
 
-/* حفظ التغييرات واستيعابها فوراً مع تحديث كود QR الجداري تلقائياً */
 function saveData() {
     localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
     localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
     localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
     localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
-    setTimeout(generateLiveWallQR, 200);
 }
 
 function switchView(view) {
