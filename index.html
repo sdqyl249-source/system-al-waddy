@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>نظام إدارة الجدول المباشر والمراقبة الميدانية - مدرسة وادي العين الابتدائية للبنين</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<!-- مكتبة توليد رمز QR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <style>
 :root { --primary-color: #1e293b; --accent-color: #2563eb; --bg-color: #f1f5f9; --border-color: #cbd5e1; --danger-color: #ef4444; --success-color: #16a34a; }
 * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
@@ -24,6 +27,7 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 .btn-manage { background-color: #0d9488; }
 .btn-notify { background-color: #ea580c; }
 .btn-print { background-color: #0284c7; }
+.btn-qr { background-color: #8b5cf6; }
 .btn-auth { background-color: #475569; }
 .btn-danger { background-color: var(--danger-color); }
 .btn:hover { opacity: 0.9; transform: translateY(-1px); }
@@ -47,7 +51,7 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 .vertical-container { display: flex; flex-direction: column; gap: 20px; }
 
 /* الكروت والتصميم الخاص بكل صف */
-.class-section-card { border-radius: 10px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08); overflow: hidden; background: #fff; page-break-after: always; break-after: page; }
+.class-section-card { border-radius: 10px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08); overflow: hidden; background: #fff; }
 .table-responsive-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
 .class-section-card[data-class^="الأول"] { border-top: 5px solid #0284c7; background-color: #e0f2fe; }
@@ -109,7 +113,7 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
 .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; max-height: 120px; overflow-y: auto; border: 1px solid #e2e8f0; padding: 8px; border-radius: 6px; }
 .checkbox-item { font-size: 12.5px; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 4px; }
 
-/* قواعد التجاوب والطباعة */
+/* قواعد التجاوب */
 @media (max-width: 768px) {
   body { padding: 10px; }
   .app-bar { padding: 12px 15px; }
@@ -119,17 +123,34 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
   .grid-2col-mobile { grid-template-columns: 1fr !important; }
 }
 
+/* 🖨️ قواعد الطباعة المحسنة والمخصصة لملء الصفحة (افقي أو عمودي) */
+@page {
+    size: A4 auto;
+    margin: 5mm;
+}
 @media print { 
-  .app-bar, .navigation-tabs, .btn-group, .btn-auth, .conflict-panel, .report-card { display: none !important; } 
-  body { padding: 0; background: white; } 
+  .app-bar, .navigation-tabs, .btn-group, .btn-auth, .conflict-panel, .report-card, .print-options-bar { display: none !important; } 
+  body { padding: 0; background: white; margin: 0; } 
+  .vertical-container { gap: 0 !important; }
   .class-section-card { 
     page-break-after: always !important; 
     break-after: page !important; 
-    margin-bottom: 0 !important; 
+    margin: 0 !important;
+    width: 100% !important;
+    height: 98vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
     border: 2px solid #000 !important;
     box-shadow: none !important;
+    box-sizing: border-border-box !important;
   } 
-  .vertical-table th, .day-title-col, td.cell-slot { -webkit-print-color-adjust: exact; } 
+  .table-responsive-wrapper { flex-grow: 1; display: flex; }
+  .vertical-table { height: 100% !important; width: 100% !important; }
+  .vertical-table th, .day-title-col, td.cell-slot { -webkit-print-color-adjust: exact; print-color-adjust: exact; } 
+  .vertical-table th { font-size: 16px !important; }
+  .subject-title { font-size: 16px !important; }
+  .teacher-name { font-size: 14px !important; }
 }
 </style>
 </head>
@@ -146,7 +167,9 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
     <div class="btn-group">
         <button class="btn btn-manage admin-only" onclick="openTeachersConfigModal()">👨‍🏫 إدارة بيانات وقواعد المعلمين</button>
         <button class="btn btn-notify admin-only" onclick="sendGlobalNotification()">🔔 إرسال الإشعارات الشاملة</button>
-        <button class="btn btn-print" onclick="window.print()">🖨️ طباعة الجدول (كل شعبة بصفحة)</button>
+        <button class="btn btn-print" onclick="triggerPrint('landscape')">🖨️ طباعة أفقي (ملء الصفحة)</button>
+        <button class="btn btn-print" style="background-color: #0369a1;" onclick="triggerPrint('portrait')">📄 طباعة عمودي (ملء الصفحة)</button>
+        <button class="btn btn-qr" onclick="generateOfflineQR()">📱 رمز QR (يعمل بدون نت)</button>
         <button class="btn btn-danger admin-only" onclick="resetAllData()">🔄 تفريغ الجدول</button>
     </div>
 </div>
@@ -201,6 +224,18 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
     </div>
 </div>
 
+<!-- مودال عرض رمز QR للفتح بدون إنترنت -->
+<div id="qrModal" class="modal-overlay">
+    <div class="modal-content" style="width: 420px; text-align: center;">
+        <h3 style="font-weight: 800; margin-top:0; color: #1e3a8a;">📱 رمز QR للجدول (شغال بدون انترنت)</h3>
+        <p style="font-size: 13px; color: #475569;">امسح الرمز أدناه بكاميرا هاتفك لفتح الجدول أو حفظه مباشرة على الجهاز حتى في حالة عدم توفر الإنترنت.</p>
+        <div id="qrcode" style="display: flex; justify-content: center; margin: 15px 0;"></div>
+        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+            <button class="btn btn-danger" style="width: auto;" onclick="closeQRModal()">إغلاق</button>
+        </div>
+    </div>
+</div>
+
 <!-- مودال تعديل خلايا الجدول -->
 <div id="cellModal" class="modal-overlay">
     <div class="modal-content">
@@ -214,7 +249,6 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
                 <label style="font-weight: 700;">المادة الدراسية:</label>
                 <select id="subjectSelect" class="form-control"></select>
             </div>
-            <!-- تنبيه حاد ومباشر في حالة التضارب عند الاختيار -->
             <div id="modalConflictWarning" style="display: none; background-color: #fee2e2; border: 1px solid #f87171; color: #991b1b; padding: 10px; border-radius: 6px; font-weight: 700; font-size: 13px; margin-top: 10px;"></div>
         </div>
         <div id="patrolFormGroup" style="display: none;">
@@ -301,54 +335,18 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
     </div>
 </div>
 
-<!-- Firebase SDK Module Integration -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
-  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBLDeAq__ODPxd015mOnj70Hq6idXI5oOQ",
-    authDomain: "wadi-aleayn.firebaseapp.com",
-    databaseURL: "https://wadi-aleayn-default-rtdb.firebaseio.com",
-    projectId: "wadi-aleayn",
-    storageBucket: "wadi-aleayn.firebasestorage.app",
-    messagingSenderId: "279971932853",
-    appId: "1:279971932853:web:e9a0cd8197d0293b7d6cfc",
-    measurementId: "G-VN5QXY69KX"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const db = getFirestore(app);
-
-  window.app = app;
-  window.db = db;
-  window.doc = doc;
-  window.setDoc = setDoc;
-  window.onSnapshot = onSnapshot;
-
-  if (typeof window.initRealtimeSync === 'function') {
-      window.initRealtimeSync();
-  }
-</script>
-
 <script>
 const STORAGE_LESSONS = 'SCHEDULE_LESSONS_PERMANENT_V5';
 const STORAGE_PATROL = 'SCHEDULE_PATROL_PERMANENT_V5';
 const STORAGE_RULES = 'TEACHERS_RULES_PERMANENT_V5';
 const STORAGE_CONFIG = 'SCHOOL_CONFIG_PERMANENT_V1';
-const LEGACY_KEYS = { lessons: ['SCHEDULE_LESSONS_PERMANENT_V6','SCHEDULE_LESSONS_PERMANENT_V5'], patrol: ['SCHEDULE_PATROL_PERMANENT_V6','SCHEDULE_PATROL_PERMANENT_V5'], rules: ['TEACHERS_RULES_PERMANENT_V6','TEACHERS_RULES_PERMANENT_V5'], config: ['SCHOOL_CONFIG_PERMANENT_V1'] };
-
-function readStored(keys){ for(const k of keys){ const v=localStorage.getItem(k); if(v!==null) return v; } return null; }
 
 const ADMIN_PIN = "19801234";
 const TEACHER_PIN = "19801980";
 
-// الرمز والنظام المعتمد للصلاحيات (admin, teacher, visitor)
 let currentRole = localStorage.getItem("USER_ROLE_SAVED") || "visitor";
-
 let currentView = 'lessons';
+
 const weekDays = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس"];
 let classes = [
     "الأول - أ", "الأول - ب",
@@ -396,6 +394,53 @@ let teachers = [
 
 let TEACHER_RULES = [];
 let lessonsData = {}, patrolData = {}, activeCellInfo = null;
+
+/* وظيفة إعدادات الطباعة للتحكم بالوضع الأفقي أو العمودي */
+function triggerPrint(orientation) {
+    let style = document.getElementById('dynamicPrintStyle');
+    if (!style) {
+        style = document.createElement('style');
+        style.id = 'dynamicPrintStyle';
+        document.head.appendChild(style);
+    }
+    if (orientation === 'landscape') {
+        style.innerHTML = `@page { size: A4 landscape; margin: 4mm; }`;
+    } else {
+        style.innerHTML = `@page { size: A4 portrait; margin: 4mm; }`;
+    }
+    window.print();
+}
+
+/* توليد رمز QR يحوي التطبيق بالكامل بالبيانات الحالية للعمل بدون إنترنت */
+function generateOfflineQR() {
+    const qrContainer = document.getElementById("qrcode");
+    qrContainer.innerHTML = "";
+
+    // بناء كود HTML مصغر ومستقل للعمل بدون نت
+    const htmlContent = document.documentElement.outerHTML;
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        // إنشاء رابط دائم من نوع Data URL
+        const dataUrl = e.target.result;
+        
+        new QRCode(qrContainer, {
+            text: dataUrl,
+            width: 220,
+            height: 220,
+            colorDark : "#0f172a",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.L
+        });
+        document.getElementById("qrModal").style.display = "flex";
+    };
+    reader.readAsDataURL(blob);
+}
+
+function closeQRModal() {
+    document.getElementById("qrModal").style.display = "none";
+}
 
 function getTeachersList() { 
     if (TEACHER_RULES && TEACHER_RULES.length > 0) {
@@ -564,53 +609,20 @@ function renderVerticalSchedule() {
     });
 }
 
-window.initRealtimeSync = function() {
-    let lData = readStored(LEGACY_KEYS.lessons);
-    let pData = readStored(LEGACY_KEYS.patrol);
-    let rData = readStored(LEGACY_KEYS.rules);
-    let cData = readStored(LEGACY_KEYS.config);
+function initData() {
+    let lData = localStorage.getItem(STORAGE_LESSONS);
+    let pData = localStorage.getItem(STORAGE_PATROL);
+    let rData = localStorage.getItem(STORAGE_RULES);
+    let cData = localStorage.getItem(STORAGE_CONFIG);
+
     if (cData) { try { const cfg = JSON.parse(cData); if (Array.isArray(cfg.classes) && cfg.classes.length) classes = cfg.classes; if (Array.isArray(cfg.teachers) && cfg.teachers.length) teachers = cfg.teachers; } catch(e) {} }
 
     TEACHER_RULES = rData ? JSON.parse(rData) : [];
-    TEACHER_RULES = (Array.isArray(TEACHER_RULES) ? TEACHER_RULES : []).map(rule => {
-        if (!rule.subjectClasses) {
-            rule.subjectClasses = {};
-            (rule.subjects || []).forEach(subject => { rule.subjectClasses[subject] = [...(rule.classes || [])]; });
-        }
-        return rule;
-    });
     lessonsData = lData ? JSON.parse(lData) : createEmptyLessonsStructure();
     patrolData = pData ? JSON.parse(pData) : createEmptyPatrolStructure();
-    
-    localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
-    localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
-    localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
-    localStorage.setItem(STORAGE_CONFIG, JSON.stringify({classes, teachers}));
 
-    if (window.db) {
-        window.onSnapshot(window.doc(window.db, "schedules", "mainSchedule"), (docSnap) => {
-            if (docSnap.exists()) {
-                const firebaseData = docSnap.data();
-                if(firebaseData.lessonsData) lessonsData = firebaseData.lessonsData;
-                if(firebaseData.patrolData) patrolData = firebaseData.patrolData;
-                if(firebaseData.teacherRules) TEACHER_RULES = firebaseData.teacherRules;
-                if(firebaseData.schoolConfig) { if (Array.isArray(firebaseData.schoolConfig.classes)) classes = firebaseData.schoolConfig.classes; if (Array.isArray(firebaseData.schoolConfig.teachers)) teachers = firebaseData.schoolConfig.teachers; }
-                
-                localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
-                localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
-                localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
-                localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
-
-                renderVerticalSchedule();
-                detectConflicts();
-            }
-        }, (error) => {
-            console.log("خطأ في المزامنة المباشرة، تم الاعتماد على التخزين المحلي:", error);
-        });
-    } else {
-        renderVerticalSchedule();
-        detectConflicts();
-    }
+    renderVerticalSchedule();
+    detectConflicts();
     updateUIState();
 }
 
@@ -635,25 +647,11 @@ function createEmptyPatrolStructure() {
     return struct;
 }
 
-async function saveData() {
+function saveData() {
     localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
     localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
     localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
-
-    if (window.db) {
-        try {
-            await window.setDoc(window.doc(window.db, "schedules", "mainSchedule"), {
-                lessonsData: lessonsData,
-                patrolData: patrolData,
-                teacherRules: TEACHER_RULES,
-                schoolConfig: { classes, teachers },
-                adminPin: ADMIN_PIN,
-                lastUpdated: new Date().toISOString()
-            });
-        } catch (e) {
-            console.error("خطأ أثناء رفع التحديثات إلى Firebase:", e);
-        }
-    }
+    localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
 }
 
 function switchView(view) {
@@ -776,15 +774,11 @@ function applyCellEdit() {
         if (!lessonsData[day][cls]) lessonsData[day][cls] = {};
         lessonsData[day][cls][slot] = { subject: newSub, teacher: newTeacher };
 
-        // منطق توجيه الإشعارات المخصص حسب نوع التغيير
         if (teacherChanged && !subjectChanged) {
-            // المعلم فقط -> للمعلمين فقط
             alert(`📢 إشعار مخصص (للمعلمين فقط):\nتم تغيير المعلم لشعبة ${cls} - ${day} (الدرس ${slot}) إلى: ${newTeacher || 'بدون معلم'}.`);
         } else if (subjectChanged && !teacherChanged) {
-            // المادة فقط -> للكل (عام)
             alert(`📢 إشعار عام (للجميع):\nتم تغيير مادة شعبة ${cls} - ${day} (الدرس ${slot}) إلى: ${newSub}.`);
         } else if (teacherChanged && subjectChanged) {
-            // معلم ومادة معاً -> للكل (عام)
             alert(`📢 إشعار عام (للجميع):\nتم تغيير المادة والمعلم لشعبة ${cls} - ${day} (الدرس ${slot}) إلى: ${newSub} (${newTeacher}).`);
         }
 
@@ -1004,11 +998,7 @@ function resetAllData() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    if (typeof window.initRealtimeSync === 'function') {
-        window.initRealtimeSync();
-    } else {
-        updateUIState();
-    }
+    initData();
 });
 </script>
 </body>
