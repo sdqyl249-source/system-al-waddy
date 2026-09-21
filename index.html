@@ -22,7 +22,6 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 .btn { padding: 8px 14px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; transition: all 0.2s; color: white; font-size: 13.5px; display: inline-flex; align-items: center; gap: 5px; justify-content: center; }
 .btn-save { background-color: var(--success-color); }
 .btn-manage { background-color: #0d9488; }
-.btn-fix { background-color: #d97706; }
 .btn-notify { background-color: #ea580c; }
 .btn-print { background-color: #0284c7; }
 .btn-auth { background-color: #475569; }
@@ -146,8 +145,7 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
     </div>
     <div class="btn-group">
         <button class="btn btn-manage admin-only" onclick="openTeachersConfigModal()">👨‍🏫 إدارة بيانات وقواعد المعلمين</button>
-        <button class="btn btn-fix admin-only" onclick="resolveConflicts()">✨ إصلاح التضارب</button>
-        <button class="btn btn-notify admin-only" onclick="sendGlobalNotification()">🔔 إرسال الإشعارات للكل</button>
+        <button class="btn btn-notify admin-only" onclick="sendGlobalNotification()">🔔 إرسال الإشعارات الشاملة</button>
         <button class="btn btn-print" onclick="window.print()">🖨️ طباعة الجدول (كل شعبة بصفحة)</button>
         <button class="btn btn-danger admin-only" onclick="resetAllData()">🔄 تفريغ الجدول</button>
     </div>
@@ -210,13 +208,14 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
         <div id="lessonFormGroup">
             <div style="margin-bottom: 12px;">
                 <label style="font-weight: 700;">المعلم المسؤول:</label>
-                <select id="teacherSelect" class="form-control" onchange="filterSubjectsByTeacher()"></select>
+                <select id="teacherSelect" class="form-control" onchange="checkTeacherConflictAndFilter()"></select>
             </div>
             <div style="margin-bottom: 12px;">
                 <label style="font-weight: 700;">المادة الدراسية:</label>
                 <select id="subjectSelect" class="form-control"></select>
             </div>
-            <div id="cellSuggestions" style="margin-top: 10px; font-size: 12.5px; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;"></div>
+            <!-- تنبيه حاد ومباشر في حالة التضارب عند الاختيار -->
+            <div id="modalConflictWarning" style="display: none; background-color: #fee2e2; border: 1px solid #f87171; color: #991b1b; padding: 10px; border-radius: 6px; font-weight: 700; font-size: 13px; margin-top: 10px;"></div>
         </div>
         <div id="patrolFormGroup" style="display: none;">
             <div style="margin-bottom: 12px;">
@@ -423,7 +422,7 @@ function calculateTeacherAllocatedQuota() {
 
 function sendGlobalNotification() {
     if (currentRole !== 'admin') return;
-    alert(`📢 تم إرسال إشعار بالتغييرات والتحديثات الجديدة للجدول لكافة الكادر التعليمي (${getTeachersList().length} معلم) بنجاح!`);
+    alert(`📢 تم إرسال إشعار شامل لكافة المستخدمين بالتحديثات الأخيرة.`);
 }
 
 function openAuthModal() {
@@ -474,28 +473,58 @@ function processAuthLogin() {
     updateUIState();
 }
 
+function detectConflicts() {
+    let conflicts = [];
+    weekDays.forEach(day => {
+        for (let slot = 1; slot <= 4; slot++) {
+            let map = {};
+            classes.forEach(cls => {
+                let cell = lessonsData[day] && lessonsData[day][cls] ? lessonsData[day][cls][slot] : null;
+                if (cell && cell.teacher && cell.teacher.trim() !== "") {
+                    if (!map[cell.teacher]) map[cell.teacher] = [];
+                    map[cell.teacher].push(cls);
+                }
+            });
+            for (let t in map) {
+                if (map[t].length > 1) {
+                    conflicts.push(`يوم <b>${day}</b> (الحصة <b>${slot}</b>): المعلم <b>${t}</b> معين في شعبتين بنفس الوقت: (${map[t].join("، ")})`);
+                }
+            }
+        }
+    });
+
+    const banner = document.getElementById("conflictBanner");
+    const listDiv = document.getElementById("conflictList");
+    if (banner && listDiv) {
+        if (conflicts.length > 0 && currentRole === 'admin') {
+            banner.style.display = "block";
+            listDiv.innerHTML = conflicts.map(c => `• ${c}`).join("<br>");
+        } else {
+            banner.style.display = "none";
+            listDiv.innerHTML = "";
+        }
+    }
+}
+
 function updateUIState() {
     const badge = document.getElementById("roleBadge");
     const reportCard = document.getElementById("adminReportCard");
-    const conflictBanner = document.getElementById("conflictBanner");
 
     if (currentRole === "admin") {
         badge.innerText = "المود: مدير النظام (إدارة كاملة)"; badge.className = "role-badge role-admin";
         document.querySelectorAll(".admin-only").forEach(el => el.style.display = "inline-flex");
         reportCard.style.display = "block";
-        if (conflictBanner) conflictBanner.style.display = "block";
     } else if (currentRole === "teacher") {
         badge.innerText = "المود: معلم (عرض الجدول والطباعة)"; badge.className = "role-badge role-teacher";
         document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
         reportCard.style.display = "none";
-        if (conflictBanner) conflictBanner.style.display = "none";
     } else {
         badge.innerText = "المود: زائر (عرض المواد والطباعة)"; badge.className = "role-badge role-visitor";
         document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
         reportCard.style.display = "none";
-        if (conflictBanner) conflictBanner.style.display = "none";
     }
     renderVerticalSchedule();
+    detectConflicts();
 }
 
 function renderVerticalSchedule() {
@@ -573,12 +602,14 @@ window.initRealtimeSync = function() {
                 localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
 
                 renderVerticalSchedule();
+                detectConflicts();
             }
         }, (error) => {
             console.log("خطأ في المزامنة المباشرة، تم الاعتماد على التخزين المحلي:", error);
         });
     } else {
         renderVerticalSchedule();
+        detectConflicts();
     }
     updateUIState();
 }
@@ -634,44 +665,13 @@ function switchView(view) {
 
 function isPrimaryClass(cls) { return cls.startsWith("الأول") || cls.startsWith("الثاني") || cls.startsWith("الثالث"); }
 
-function resolveConflicts() {
-    if (currentRole !== 'admin') return;
-    let resolvedCount = 0;
-    if (currentView === 'lessons') {
-        weekDays.forEach(day => {
-            for (let slot = 1; slot <= 4; slot++) {
-                let teacherMap = {};
-                classes.forEach(cls => {
-                    let cell = lessonsData[day] && lessonsData[day][cls] ? lessonsData[day][cls][slot] : null;
-                    if (cell && cell.teacher && cell.teacher.trim() !== "") {
-                        if (!teacherMap[cell.teacher]) teacherMap[cell.teacher] = [];
-                        teacherMap[cell.teacher].push(cls);
-                    }
-                });
-
-                for (let t in teacherMap) {
-                    if (teacherMap[t].length > 1) {
-                        for (let i = 1; i < teacherMap[t].length; i++) {
-                            let clsToClear = teacherMap[t][i];
-                            lessonsData[day][clsToClear][slot].teacher = "";
-                            resolvedCount++;
-                        }
-                    }
-                }
-            }
-        });
-    }
-    saveData();
-    renderVerticalSchedule();
-    alert(`✨ تم إصلاح ${resolvedCount} حالة تضارب بنجاح!`);
-}
-
 function openCellModal(day, cls, slot) {
     if (currentRole !== 'admin') return;
     activeCellInfo = { type: 'lesson', day, cls, slot };
     document.getElementById("modalTitle").innerText = `تعديل درس: ${cls} - ${day} (الدرس ${slot})`;
     document.getElementById("lessonFormGroup").style.display = "block";
     document.getElementById("patrolFormGroup").style.display = "none";
+    document.getElementById("modalConflictWarning").style.display = "none";
 
     let cell = (lessonsData[day] && lessonsData[day][cls] && lessonsData[day][cls][slot]) ? lessonsData[day][cls][slot] : { subject: "-", teacher: "" };
 
@@ -686,8 +686,39 @@ function openCellModal(day, cls, slot) {
     });
 
     document.getElementById("cellModal").style.display = "flex";
-    filterSubjectsByTeacher();
+    checkTeacherConflictAndFilter();
     subSel.value = cell.subject || "-";
+}
+
+function checkTeacherConflictAndFilter() {
+    filterSubjectsByTeacher();
+    if (!activeCellInfo || activeCellInfo.type !== 'lesson') return;
+
+    const teacher = document.getElementById("teacherSelect").value;
+    const warningDiv = document.getElementById("modalConflictWarning");
+    if (!teacher) {
+        warningDiv.style.display = "none";
+        return;
+    }
+
+    const { day, cls, slot } = activeCellInfo;
+    let conflictingClass = "";
+
+    classes.forEach(c => {
+        if (c !== cls) {
+            let cell = lessonsData[day] && lessonsData[day][c] ? lessonsData[day][c][slot] : null;
+            if (cell && cell.teacher === teacher) {
+                conflictingClass = c;
+            }
+        }
+    });
+
+    if (conflictingClass) {
+        warningDiv.style.display = "block";
+        warningDiv.innerHTML = `⚠️ <strong>تضارب في الجدول!</strong><br>المعلم <b>${teacher}</b> معين بالفعل في يوم (<b>${day}</b>) - (<b>الدرس ${slot}</b>) في شعبة (<b>${conflictingClass}</b>).`;
+    } else {
+        warningDiv.style.display = "none";
+    }
 }
 
 function openPatrolModal(day, zone) {
@@ -727,13 +758,36 @@ function closeModal() {
 
 function applyCellEdit() {
     if (!activeCellInfo) return;
+    
     if (activeCellInfo.type === 'lesson') {
         let { day, cls, slot } = activeCellInfo;
-        let sub = document.getElementById("subjectSelect").value;
-        let t = document.getElementById("teacherSelect").value;
+        let newSub = document.getElementById("subjectSelect").value;
+        let newTeacher = document.getElementById("teacherSelect").value;
+
+        let oldCell = (lessonsData[day] && lessonsData[day][cls] && lessonsData[day][cls][slot]) ? lessonsData[day][cls][slot] : { subject: "-", teacher: "" };
+        
+        let oldSub = oldCell.subject || "-";
+        let oldTeacher = oldCell.teacher || "";
+
+        let teacherChanged = (oldTeacher !== newTeacher);
+        let subjectChanged = (oldSub !== newSub);
+
         if (!lessonsData[day]) lessonsData[day] = {};
         if (!lessonsData[day][cls]) lessonsData[day][cls] = {};
-        lessonsData[day][cls][slot] = { subject: sub, teacher: t };
+        lessonsData[day][cls][slot] = { subject: newSub, teacher: newTeacher };
+
+        // منطق توجيه الإشعارات المخصص حسب نوع التغيير
+        if (teacherChanged && !subjectChanged) {
+            // المعلم فقط -> للمعلمين فقط
+            alert(`📢 إشعار مخصص (للمعلمين فقط):\nتم تغيير المعلم لشعبة ${cls} - ${day} (الدرس ${slot}) إلى: ${newTeacher || 'بدون معلم'}.`);
+        } else if (subjectChanged && !teacherChanged) {
+            // المادة فقط -> للكل (عام)
+            alert(`📢 إشعار عام (للجميع):\nتم تغيير مادة شعبة ${cls} - ${day} (الدرس ${slot}) إلى: ${newSub}.`);
+        } else if (teacherChanged && subjectChanged) {
+            // معلم ومادة معاً -> للكل (عام)
+            alert(`📢 إشعار عام (للجميع):\nتم تغيير المادة والمعلم لشعبة ${cls} - ${day} (الدرس ${slot}) إلى: ${newSub} (${newTeacher}).`);
+        }
+
     } else {
         let { day, zone } = activeCellInfo;
         let t1 = document.getElementById("patrolTeacher1Select").value;
@@ -744,9 +798,11 @@ function applyCellEdit() {
         if (!patrolData[day]) patrolData[day] = {};
         patrolData[day][zone] = { teachers: list };
     }
+    
     saveData();
     closeModal();
     renderVerticalSchedule();
+    detectConflicts();
 }
 
 function openTeachersConfigModal() {
@@ -928,7 +984,7 @@ function renderTeacherRulesTable() {
             <td><small>${cls}</small></td>
             <td><b>${getTeacherActualLessonCount(rule.name)}</b></td>
             <td>
-                <button class="btn btn-fix" style="padding: 3px 8px; font-size: 11px; width: auto;" onclick="editTeacherRule(${idx})">تعديل</button>
+                <button class="btn btn-notify" style="padding: 3px 8px; font-size: 11px; width: auto;" onclick="editTeacherRule(${idx})">تعديل</button>
                 <button class="btn btn-danger" style="padding: 3px 8px; font-size: 11px; width: auto;" onclick="deleteTeacherRule(${idx})">حذف</button>
             </td>
         </tr>`;
@@ -942,6 +998,7 @@ function resetAllData() {
         patrolData = createEmptyPatrolStructure();
         saveData();
         renderVerticalSchedule();
+        detectConflicts();
         alert("تم تفريغ الجدول بنجاح مع الاحتفاظ بكافة بيانات المعلمين والتكوين الأساسي.");
     }
 }
