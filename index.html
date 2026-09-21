@@ -23,9 +23,9 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
     justify-content: space-between;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
-.wall-qr-info { max-width: 70%; }
-.wall-qr-info h3 { margin: 0 0 5px 0; color: #1e3a8a; font-size: 16px; font-weight: 800; }
-.wall-qr-info p { margin: 0; font-size: 13px; color: #475569; font-weight: 600; }
+.wall-qr-info { max-width: 75%; }
+.wall-qr-info h3 { margin: 0 0 6px 0; color: #1e3a8a; font-size: 16px; font-weight: 800; }
+.wall-qr-info p { margin: 0; font-size: 13.5px; color: #475569; font-weight: 600; line-height: 1.5; }
 .qr-display-box {
     background: #ffffff;
     padding: 8px;
@@ -34,6 +34,7 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-width: 120px;
 }
 
 /* الشريط العلوي */
@@ -209,14 +210,14 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
 </head>
 <body>
 
-<!-- قسم رمز QR المخصص للتثبيت على الجدار مع الصورة المحددة -->
+<!-- قسم رمز QR المخصص للتثبيت على الجدار -->
 <div class="wall-qr-section">
     <div class="wall-qr-info">
         <h3>📱 رمز الوصول المباشر للجدول (صالح للطباعة والتعليق على الجدار)</h3>
-        <p>بمجرد مسح هذا الرمز بكاميرا الهاتف، سيفتح الجدول المحدث فوراً ويعمل في حالة توفر الإنترنت أو **بدون إنترنت إطلاقاً (Offline)**.</p>
+        <p>بمجرد مسح هذا الرمز بكاميرا الهاتف، سيفتح الجدول المحدث فوراً ويعمل في حالة توفر الإنترنت أو <strong>بدون إنترنت إطلاقاً (Offline)</strong>.</p>
     </div>
     <div class="qr-display-box">
-        <img src="qr qr code.jpeg" alt="QR Code" style="width: 110px; height: 110px; object-fit: contain;">
+        <img src="qr%20qr%20code.jpeg" alt="QR Code" style="width: 110px; height: 110px; object-fit: contain;" onerror="this.onerror=null; this.src='qr qr code.jpeg';">
         <span style="font-size: 11px; font-weight: 800; color: #1e3a8a; margin-top: 4px;">مسح للفتح المباشر</span>
     </div>
 </div>
@@ -376,7 +377,6 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
 </div>
 
 <script>
-// مفاتيح التخزين لتحديث وحفظ البيانات المباشرة بدون رجوع للقديم
 const STORAGE_LESSONS = 'SCHEDULE_LESSONS_PERMANENT_V6';
 const STORAGE_PATROL = 'SCHEDULE_PATROL_PERMANENT_V6';
 const STORAGE_RULES = 'TEACHERS_RULES_PERMANENT_V6';
