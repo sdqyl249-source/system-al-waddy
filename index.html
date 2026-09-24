@@ -332,7 +332,7 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
     </div>
 </div>
 
-<!-- 🔥 استدعاء مكتبة Firebase أونلاين بصيغة JS Modules الحديثة وتفعيل التحديث الآني -->
+<!-- 🔥 استدعاء مكتبة Firebase أونلاين بصيغة JS Modules والتفعيل الفوري الشامل للمزامنة -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -380,33 +380,13 @@ let primarySubjects = ["التربية الإسلامية", "اللغة العر
 let upperSubjects = ["التربية الإسلامية", "اللغة العربية", "اللغة الإنكليزية", "الرياضيات", "العلوم", "الاجتماعيات", "رياضة", "فنية ونشيد"];
 
 let teachers = [
-  "أ. عقيل سعد عامر",
-  "أ. علي أحمد عبد الزهرة", 
-  "أ. كوثر جاسم اخميس", 
-  "أ. عبد الوهاب محمود شاكر", 
-  "أ. زينة جبر راضي", 
-  "أ. ليلى بدر عبود", 
-  "أ. أم كلثوم علي عيسى", 
-  "أ. تبارك خيري رسن", 
-  "أ. ماجدة جودة لعيبي", 
-  "أ. نضال محمود حسين", 
-  "أ. علياء حسين زوري", 
-  "أ. أمل حميد بدن", 
-  "أ. بيداء كريم لعيبي", 
-  "أ. إيمان علي عبد الحسين", 
-  "أ. إيلاف عماد إحسان", 
-  "أ. حسين حمد حمادي", 
-  "أ. أحمد عادل عبد القادر", 
-  "أ. سارة حميد علي", 
-  "أ. دعاء كريم سليم", 
-  "أ. شروق عماد عبد الحمزة", 
-  "أ. ابتسام شمخي عليوي", 
-  "أ. نورا علي عبد الشهيد", 
-  "أ. نور حسين عبد علي", 
-  "أ. علي طالب محمد", 
-  "أ. صادق يونس محمد", 
-  "أ. نورا أسعد كامل", 
-  "أ. قاسم محمود"
+  "أ. عقيل سعد عامر", "أ. علي أحمد عبد الزهرة", "أ. كوثر جاسم اخميس", "أ. عبد الوهاب محمود شاكر", 
+  "أ. زينة جبر راضي", "أ. ليلى بدر عبود", "أ. أم كلثوم علي عيسى", "أ. تبارك خيري رسن", 
+  "أ. ماجدة جودة لعيبي", "أ. نضال محمود حسين", "أ. علياء حسين زوري", "أ. أمل حميد بدن", 
+  "أ. بيداء كريم لعيبي", "أ. إيمان علي عبد الحسين", "أ. إيلاف عماد إحسان", "أ. حسين حمد حمادي", 
+  "أ. أحمد عادل عبد القادر", "أ. سارة حميد علي", "أ. دعاء كريم سليم", "أ. شروق عماد عبد الحمزة", 
+  "أ. ابتسام شمخي عليوي", "أ. نورا علي عبد الشهيد", "أ. نور حسين عبد علي", "أ. علي طالب محمد", 
+  "أ. صادق يونس محمد", "أ. نورا أسعد كامل", "أ. قاسم محمود"
 ];
 
 let TEACHER_RULES = [];
@@ -442,7 +422,7 @@ window.sendGlobalNotification = function() {
 
 window.openAuthModal = function() {
     document.getElementById("authRoleSelect").value = currentRole;
-    togglePinInput();
+    window.togglePinInput();
     document.getElementById("authModal").style.display = "flex";
 };
 
@@ -484,7 +464,7 @@ window.processAuthLogin = function() {
     }
 
     localStorage.setItem("USER_ROLE_SAVED", currentRole);
-    closeAuthModal();
+    window.closeAuthModal();
     updateUIState();
 };
 
@@ -612,7 +592,7 @@ function initData() {
     lessonsData = lData ? JSON.parse(lData) : createEmptyLessonsStructure();
     patrolData = pData ? JSON.parse(pData) : createEmptyPatrolStructure();
 
-    // 🔥 الاستماع والمزامنة المباشرة أونلاين لحظياً Real-time عبر Firebase
+    // 🔥 الاستماع والتحديث الفوري عند أي تعديل أونلاين عبر السحابة Realtime
     const scheduleRef = ref(db, 'school_schedule');
     onValue(scheduleRef, (snapshot) => {
         const cloudData = snapshot.val();
@@ -623,7 +603,7 @@ function initData() {
             if (cloudData.teachers) teachers = cloudData.teachers;
             if (cloudData.classes) classes = cloudData.classes;
 
-            // الحفظ المحلي للعمل الأوفلاين عند انقطاع الإنترنت
+            // تحديث التخزين المحلي للاستخدام عند انقطاع الشبكة
             localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
             localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
             localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
@@ -643,13 +623,13 @@ function initData() {
 }
 
 function saveData() {
-    // 1. الحفظ المحلي
+    // 1. الحفظ في الذاكرة المحلية للجهاز الحالي
     localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
     localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
     localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
     localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
 
-    // 2. الحفظ والمزامنة الفورية في السحابة أونلاين
+    // 2. إرسال البيانات أونلاين لتتحدث فوراً عند كل الأجهزة
     set(ref(db, 'school_schedule'), {
         lessonsData: lessonsData,
         patrolData: patrolData,
@@ -657,9 +637,9 @@ function saveData() {
         teachers: teachers,
         classes: classes
     }).then(() => {
-        console.log("تمت المزامنة أونلاين بنجاح");
+        console.log("تم التحديث أونلاين بنجاح لكافة الأجهزة");
     }).catch((err) => {
-        console.error("خطأ المزامنة:", err);
+        console.error("خطأ المزامنة السحابية:", err);
     });
 }
 
@@ -693,7 +673,7 @@ window.openCellModal = function(day, cls, slot) {
     });
 
     document.getElementById("cellModal").style.display = "flex";
-    checkTeacherConflictAndFilter();
+    window.checkTeacherConflictAndFilter();
     subSel.value = cell.subject || "-";
 };
 
@@ -787,7 +767,7 @@ window.applyCellEdit = function() {
     }
     
     saveData();
-    closeModal();
+    window.closeModal();
     renderVerticalSchedule();
     detectConflicts();
 };
@@ -802,7 +782,7 @@ window.openTeachersConfigModal = function() {
 
 window.closeTeachersConfigModal = function() {
     document.getElementById("teachersConfigModal").style.display = "none";
-    clearTeacherForm();
+    window.clearTeacherForm();
 };
 
 function populateTeacherSelectOptions() {
@@ -832,7 +812,7 @@ function renderAssignmentSubjectOptions(selectedSubject = "") {
     const sel = document.getElementById("assignmentSubjectSelect");
     if (!sel) return;
     sel.innerHTML = '<option value="">-- اختر المادة --</option>' + allSubjects.map(s => `<option value="${s}" ${s === selectedSubject ? "selected" : ""}>${s}</option>`).join("");
-    renderLinkedClassCheckboxes();
+    window.renderLinkedClassCheckboxes();
 }
 
 window.renderLinkedClassCheckboxes = function(selectedClasses = null) {
@@ -894,7 +874,7 @@ window.saveTeacherRule = function() {
     const idx = editIndex >= 0 ? editIndex : TEACHER_RULES.findIndex(r => r.name === name);
     if (idx >= 0) TEACHER_RULES[idx] = ruleData; else TEACHER_RULES.push(ruleData);
     if (!teachers.includes(name)) teachers.push(name);
-    saveData(); renderTeacherRulesTable(); clearTeacherForm();
+    saveData(); renderTeacherRulesTable(); window.clearTeacherForm();
     alert("تم حفظ الارتباط بنجاح.");
 };
 
@@ -913,7 +893,7 @@ window.editTeacherRule = function(index) {
         document.getElementById("inputCustomTeacherName").value = rule.name;
     }
     renderAssignmentSubjectOptions(rule.subjects?.[0] || "");
-    renderLinkedClassCheckboxes();
+    window.renderLinkedClassCheckboxes();
 };
 
 window.deleteTeacherRule = function(index) {
@@ -931,7 +911,7 @@ window.clearTeacherForm = function() {
     document.getElementById("inputCustomTeacherName").style.display = "none";
     window._editingRule = null;
     renderAssignmentSubjectOptions("");
-    renderLinkedClassCheckboxes([]);
+    window.renderLinkedClassCheckboxes([]);
 };
 
 function getTeacherActualLessonCount(teacherName) {
@@ -971,7 +951,7 @@ window.resetAllData = function() {
     }
 };
 
-// بدء التهيئة والمزامنة عند اكتمال تحميل عناصر الصفحة
+// بدء المزامنة وتطبيق الأحداث فور التحميل
 document.addEventListener("DOMContentLoaded", () => {
     initData();
 });
