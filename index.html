@@ -6,10 +6,6 @@
 <title>نظام إدارة الجدول المباشر والمراقبة الميدانية - مدرسة وادي العين الابتدائية للبنين</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
-<!-- استدعاء مكتبات Firebase (الإصدار المتوافق مع المتصفح) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <style>
 :root { --primary-color: #1e293b; --accent-color: #2563eb; --bg-color: #f1f5f9; --border-color: #cbd5e1; --danger-color: #ef4444; --success-color: #16a34a; }
 * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
@@ -150,64 +146,17 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
   .modal-content { padding: 15px; }
 }
 
-/* 🖨️ قواعد الطباعة الأفقية الشاملة - كل شعبة في صفحة A4 أفقية مستقلة */
-@page {
-    size: A4 landscape;
-    margin: 10mm;
-}
 @media print { 
   .app-bar, .navigation-tabs, .btn-group, .btn-auth, .conflict-panel, .report-card, .wall-qr-section, .modal-overlay { 
       display: none !important; 
   } 
-  html, body { 
-      width: 100% !important;
-      height: auto !important;
-      margin: 0 !important; 
-      padding: 0 !important; 
-      background: white !important; 
-      overflow: visible !important;
-  } 
-  
-  .vertical-container { 
-      display: block !important; 
-      gap: 0 !important; 
-      overflow: visible !important;
-  }
-
-  .class-section-card { 
-      page-break-before: always !important;
-      page-break-after: always !important; 
-      break-before: page !important;
-      break-after: page !important; 
-      break-inside: avoid !important;
-      margin: 0 0 20px 0 !important;
-      padding: 10px !important;
-      width: 100% !important;
-      box-sizing: border-box !important;
-      border: 2px solid #000 !important;
-      box-shadow: none !important;
-      background: white !important;
-  } 
-
-  .class-section-card:first-child {
-      page-break-before: avoid !important;
-      break-before: avoid !important;
-  }
-
-  .table-responsive-wrapper { 
-      width: 100% !important;
-      overflow: visible !important;
-  }
-
-  .vertical-table { 
-      width: 100% !important; 
-      border-collapse: collapse !important;
-  }
-
-  .vertical-table th, .day-title-col, td.cell-slot { 
-      -webkit-print-color-adjust: exact !important; 
-      print-color-adjust: exact !important; 
-  } 
+  html, body { width: 100% !important; height: auto !important; margin: 0 !important; padding: 0 !important; background: white !important; overflow: visible !important; } 
+  .vertical-container { display: block !important; gap: 0 !important; overflow: visible !important; }
+  .class-section-card { page-break-before: always !important; page-break-after: always !important; break-before: page !important; break-after: page !important; break-inside: avoid !important; margin: 0 0 20px 0 !important; padding: 10px !important; width: 100% !important; box-sizing: border-box !important; border: 2px solid #000 !important; box-shadow: none !important; background: white !important; } 
+  .class-section-card:first-child { page-break-before: avoid !important; break-before: avoid !important; }
+  .table-responsive-wrapper { width: 100% !important; overflow: visible !important; }
+  .vertical-table { width: 100% !important; border-collapse: collapse !important; }
+  .vertical-table th, .day-title-col, td.cell-slot { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
   .vertical-table th { font-size: 16px !important; padding: 12px 6px !important; }
   .vertical-table td { padding: 12px 6px !important; }
   .subject-title { font-size: 16px !important; font-weight: bold !important; }
@@ -383,8 +332,12 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
     </div>
 </div>
 
-<script>
-// --- إعدادات Firebase وتفعيله ---
+<!-- 🔥 استدعاء مكتبة Firebase أونلاين بصيغة JS Modules الحديثة وتفعيل التحديث الآني -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+// إعدادات Firebase الخاصة بتطبيق منصة الوادي
 const firebaseConfig = {
   apiKey: "AIzaSyDopYhY0QaxB-GQdAKQXDFz0ib1mlGyNRI",
   authDomain: "alwaddy-4eee6.firebaseapp.com",
@@ -396,10 +349,9 @@ const firebaseConfig = {
   databaseURL: "https://alwaddy-4eee6-default-rtdb.firebaseio.com"
 };
 
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-const db = firebase.database();
+// تهيئة Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
 const STORAGE_LESSONS = 'SCHEDULE_LESSONS_PERMANENT_V6';
 const STORAGE_PATROL = 'SCHEDULE_PATROL_PERMANENT_V6';
@@ -483,22 +435,22 @@ function calculateTeacherAllocatedQuota() {
     return counts;
 }
 
-function sendGlobalNotification() {
+window.sendGlobalNotification = function() {
     if (currentRole !== 'admin') return;
     alert(`📢 تم إرسال إشعار شامل لكافة المستخدمين بالتحديثات الأخيرة.`);
-}
+};
 
-function openAuthModal() {
+window.openAuthModal = function() {
     document.getElementById("authRoleSelect").value = currentRole;
     togglePinInput();
     document.getElementById("authModal").style.display = "flex";
-}
+};
 
-function closeAuthModal() {
+window.closeAuthModal = function() {
     document.getElementById("authModal").style.display = "none";
-}
+};
 
-function togglePinInput() {
+window.togglePinInput = function() {
     const role = document.getElementById("authRoleSelect").value;
     const pinGroup = document.getElementById("pinGroup");
     if (role === "admin" || role === "teacher") {
@@ -506,9 +458,9 @@ function togglePinInput() {
     } else {
         pinGroup.style.display = "none";
     }
-}
+};
 
-function processAuthLogin() {
+window.processAuthLogin = function() {
     const role = document.getElementById("authRoleSelect").value;
     const pin = document.getElementById("authPinInput").value.trim();
 
@@ -534,7 +486,7 @@ function processAuthLogin() {
     localStorage.setItem("USER_ROLE_SAVED", currentRole);
     closeAuthModal();
     updateUIState();
-}
+};
 
 function detectConflicts() {
     let conflicts = [];
@@ -627,47 +579,6 @@ function renderVerticalSchedule() {
     });
 }
 
-function initData() {
-    let lData = localStorage.getItem(STORAGE_LESSONS);
-    let pData = localStorage.getItem(STORAGE_PATROL);
-    let rData = localStorage.getItem(STORAGE_RULES);
-    let cData = localStorage.getItem(STORAGE_CONFIG);
-
-    if (cData) { try { const cfg = JSON.parse(cData); if (Array.isArray(cfg.classes) && cfg.classes.length) classes = cfg.classes; if (Array.isArray(cfg.teachers) && cfg.teachers.length) teachers = cfg.teachers; } catch(e) {} }
-
-    TEACHER_RULES = rData ? JSON.parse(rData) : [];
-    lessonsData = lData ? JSON.parse(lData) : createEmptyLessonsStructure();
-    patrolData = pData ? JSON.parse(pData) : createEmptyPatrolStructure();
-
-    // الاستماع للتعديلات الفورية من Firebase أونلاين
-    db.ref('school_schedule').on('value', (snapshot) => {
-        const cloudData = snapshot.val();
-        if (cloudData) {
-            if (cloudData.lessonsData) lessonsData = cloudData.lessonsData;
-            if (cloudData.patrolData) patrolData = cloudData.patrolData;
-            if (cloudData.TEACHER_RULES) TEACHER_RULES = cloudData.TEACHER_RULES;
-            if (cloudData.teachers) teachers = cloudData.teachers;
-            if (cloudData.classes) classes = cloudData.classes;
-
-            // الحفظ المحلي للاستخدام الأوفلاين عند قطع النت
-            localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
-            localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
-            localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
-            localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
-
-            renderVerticalSchedule();
-            detectConflicts();
-            if (currentRole === 'admin' && document.getElementById("teachersConfigModal").style.display === "flex") {
-                renderTeacherRulesTable();
-            }
-        }
-    });
-
-    renderVerticalSchedule();
-    detectConflicts();
-    updateUIState();
-}
-
 function createEmptyLessonsStructure() {
     let struct = {};
     weekDays.forEach(day => {
@@ -689,15 +600,57 @@ function createEmptyPatrolStructure() {
     return struct;
 }
 
+function initData() {
+    let lData = localStorage.getItem(STORAGE_LESSONS);
+    let pData = localStorage.getItem(STORAGE_PATROL);
+    let rData = localStorage.getItem(STORAGE_RULES);
+    let cData = localStorage.getItem(STORAGE_CONFIG);
+
+    if (cData) { try { const cfg = JSON.parse(cData); if (Array.isArray(cfg.classes) && cfg.classes.length) classes = cfg.classes; if (Array.isArray(cfg.teachers) && cfg.teachers.length) teachers = cfg.teachers; } catch(e) {} }
+
+    TEACHER_RULES = rData ? JSON.parse(rData) : [];
+    lessonsData = lData ? JSON.parse(lData) : createEmptyLessonsStructure();
+    patrolData = pData ? JSON.parse(pData) : createEmptyPatrolStructure();
+
+    // 🔥 الاستماع والمزامنة المباشرة أونلاين لحظياً Real-time عبر Firebase
+    const scheduleRef = ref(db, 'school_schedule');
+    onValue(scheduleRef, (snapshot) => {
+        const cloudData = snapshot.val();
+        if (cloudData) {
+            if (cloudData.lessonsData) lessonsData = cloudData.lessonsData;
+            if (cloudData.patrolData) patrolData = cloudData.patrolData;
+            if (cloudData.TEACHER_RULES) TEACHER_RULES = cloudData.TEACHER_RULES;
+            if (cloudData.teachers) teachers = cloudData.teachers;
+            if (cloudData.classes) classes = cloudData.classes;
+
+            // الحفظ المحلي للعمل الأوفلاين عند انقطاع الإنترنت
+            localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
+            localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
+            localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
+            localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
+
+            renderVerticalSchedule();
+            detectConflicts();
+            if (currentRole === 'admin' && document.getElementById("teachersConfigModal").style.display === "flex") {
+                renderTeacherRulesTable();
+            }
+        }
+    });
+
+    renderVerticalSchedule();
+    detectConflicts();
+    updateUIState();
+}
+
 function saveData() {
-    // الحفظ في الذاكرة المحلية
+    // 1. الحفظ المحلي
     localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
     localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
     localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
     localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
 
-    // الحفظ المباشر أونلاين على Firebase Cloud (المزامنة الفورية)
-    db.ref('school_schedule').set({
+    // 2. الحفظ والمزامنة الفورية في السحابة أونلاين
+    set(ref(db, 'school_schedule'), {
         lessonsData: lessonsData,
         patrolData: patrolData,
         TEACHER_RULES: TEACHER_RULES,
@@ -710,16 +663,16 @@ function saveData() {
     });
 }
 
-function switchView(view) {
+window.switchView = function(view) {
     currentView = view;
     document.getElementById("tabLessons").classList.toggle("active", view === 'lessons');
     document.getElementById("tabPatrol").classList.toggle("active", view === 'patrol');
     renderVerticalSchedule();
-}
+};
 
 function isPrimaryClass(cls) { return cls.startsWith("الأول") || cls.startsWith("الثاني") || cls.startsWith("الثالث"); }
 
-function openCellModal(day, cls, slot) {
+window.openCellModal = function(day, cls, slot) {
     if (currentRole !== 'admin') return;
     activeCellInfo = { type: 'lesson', day, cls, slot };
     document.getElementById("modalTitle").innerText = `تعديل درس: ${cls} - ${day} (الدرس ${slot})`;
@@ -742,9 +695,9 @@ function openCellModal(day, cls, slot) {
     document.getElementById("cellModal").style.display = "flex";
     checkTeacherConflictAndFilter();
     subSel.value = cell.subject || "-";
-}
+};
 
-function checkTeacherConflictAndFilter() {
+window.checkTeacherConflictAndFilter = function() {
     filterSubjectsByTeacher();
     if (!activeCellInfo || activeCellInfo.type !== 'lesson') return;
 
@@ -773,9 +726,9 @@ function checkTeacherConflictAndFilter() {
     } else {
         warningDiv.style.display = "none";
     }
-}
+};
 
-function openPatrolModal(day, zone) {
+window.openPatrolModal = function(day, zone) {
     if (currentRole !== 'admin') return;
     activeCellInfo = { type: 'patrol', day, zone };
     document.getElementById("modalTitle").innerText = `تعديل المراقبين: ${zone} - ${day}`;
@@ -803,14 +756,14 @@ function openPatrolModal(day, zone) {
     });
 
     document.getElementById("cellModal").style.display = "flex";
-}
+};
 
-function closeModal() {
+window.closeModal = function() {
     document.getElementById("cellModal").style.display = "none";
     activeCellInfo = null;
-}
+};
 
-function applyCellEdit() {
+window.applyCellEdit = function() {
     if (!activeCellInfo) return;
     
     if (activeCellInfo.type === 'lesson') {
@@ -837,20 +790,20 @@ function applyCellEdit() {
     closeModal();
     renderVerticalSchedule();
     detectConflicts();
-}
+};
 
-function openTeachersConfigModal() {
+window.openTeachersConfigModal = function() {
     if (currentRole !== 'admin') return;
     renderTeacherRulesTable();
     populateTeacherSelectOptions();
     renderAssignmentSubjectOptions("");
     document.getElementById("teachersConfigModal").style.display = "flex";
-}
+};
 
-function closeTeachersConfigModal() {
+window.closeTeachersConfigModal = function() {
     document.getElementById("teachersConfigModal").style.display = "none";
     clearTeacherForm();
-}
+};
 
 function populateTeacherSelectOptions() {
     const sel = document.getElementById("selectTeacherName");
@@ -859,11 +812,11 @@ function populateTeacherSelectOptions() {
     sel.innerHTML += '<option value="__custom__">+ إضافة معلم جديد باسم مخصص</option>';
 }
 
-function onTeacherSelected(value) {
+window.onTeacherSelected = function(value) {
     toggleCustomTeacherInput(value);
     const rule = TEACHER_RULES.find(r => r.name === value);
     renderAssignmentSubjectOptions(rule?.subjects?.[0] || "");
-}
+};
 
 function toggleCustomTeacherInput(val) {
     const customInput = document.getElementById("inputCustomTeacherName");
@@ -882,7 +835,7 @@ function renderAssignmentSubjectOptions(selectedSubject = "") {
     renderLinkedClassCheckboxes();
 }
 
-function renderLinkedClassCheckboxes(selectedClasses = null) {
+window.renderLinkedClassCheckboxes = function(selectedClasses = null) {
     const subject = document.getElementById("assignmentSubjectSelect")?.value;
     const container = document.getElementById("linkedClassCheckboxContainer");
     if (!container) return;
@@ -897,7 +850,7 @@ function renderLinkedClassCheckboxes(selectedClasses = null) {
         subject === "الأخلاقية" ? ["الأول", "الثاني", "الثالث"] : classes.map(c => c.split(" - ")[0]);
     const allowed = [...new Set(classes.filter(c => grade.includes(c.split(" - ")[0])))];
     container.innerHTML = allowed.map(c => `<label class="checkbox-item"><input type="checkbox" value="${c}" ${existing.includes(c) ? "checked" : ""}> ${c}</label>`).join("");
-}
+};
 
 function filterSubjectsByTeacher() {
     const teacher = document.getElementById("teacherSelect").value;
@@ -910,7 +863,7 @@ function filterSubjectsByTeacher() {
     if ([...sel.options].some(o => o.value === current)) sel.value = current;
 }
 
-function addStaffMember() {
+window.addStaffMember = function() {
     if (currentRole !== 'admin') return;
     const name = document.getElementById("inputNewStaffName").value.trim();
     if (!name) return alert("اكتب اسم المعلم أولاً.");
@@ -918,9 +871,9 @@ function addStaffMember() {
     if (!TEACHER_RULES.some(r => r.name === name)) TEACHER_RULES.push({ name, subjects: [], classes: [], maxQuota: 0 });
     document.getElementById("inputNewStaffName").value = "";
     populateTeacherSelectOptions(); renderTeacherRulesTable(); saveData();
-}
+};
 
-function saveTeacherRule() {
+window.saveTeacherRule = function() {
     if (currentRole !== 'admin') return;
     const editIndex = parseInt(document.getElementById("editTeacherIndex").value);
     const selName = document.getElementById("selectTeacherName").value;
@@ -943,9 +896,9 @@ function saveTeacherRule() {
     if (!teachers.includes(name)) teachers.push(name);
     saveData(); renderTeacherRulesTable(); clearTeacherForm();
     alert("تم حفظ الارتباط بنجاح.");
-}
+};
 
-function editTeacherRule(index) {
+window.editTeacherRule = function(index) {
     let rule = TEACHER_RULES[index];
     if (!rule) return;
     window._editingRule = rule;
@@ -961,17 +914,17 @@ function editTeacherRule(index) {
     }
     renderAssignmentSubjectOptions(rule.subjects?.[0] || "");
     renderLinkedClassCheckboxes();
-}
+};
 
-function deleteTeacherRule(index) {
+window.deleteTeacherRule = function(index) {
     if (confirm("هل أنت متأكد من حذف هذا المعلم وقواعده؟")) {
         TEACHER_RULES.splice(index, 1);
         saveData();
         renderTeacherRulesTable();
     }
-}
+};
 
-function clearTeacherForm() {
+window.clearTeacherForm = function() {
     document.getElementById("editTeacherIndex").value = "-1";
     document.getElementById("selectTeacherName").value = "";
     document.getElementById("inputCustomTeacherName").value = "";
@@ -979,7 +932,7 @@ function clearTeacherForm() {
     window._editingRule = null;
     renderAssignmentSubjectOptions("");
     renderLinkedClassCheckboxes([]);
-}
+};
 
 function getTeacherActualLessonCount(teacherName) {
     const counts = calculateTeacherAllocatedQuota();
@@ -1006,7 +959,7 @@ function renderTeacherRulesTable() {
     });
 }
 
-function resetAllData() {
+window.resetAllData = function() {
     if (currentRole !== 'admin') return;
     if (confirm("⚠️ هل تريد تفريغ جدول الدروس حصراً؟ لن يتم حذف أسماء المعلمين ولا الشعب.")) {
         lessonsData = createEmptyLessonsStructure();
@@ -1016,9 +969,10 @@ function resetAllData() {
         detectConflicts();
         alert("تم تفريغ الجدول بنجاح.");
     }
-}
+};
 
-window.addEventListener("DOMContentLoaded", () => {
+// بدء التهيئة والمزامنة عند اكتمال تحميل عناصر الصفحة
+document.addEventListener("DOMContentLoaded", () => {
     initData();
 });
 </script>
