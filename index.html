@@ -6,6 +6,10 @@
 <title>نظام إدارة الجدول المباشر والمراقبة الميدانية - مدرسة وادي العين الابتدائية للبنين</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
+<!-- استدعاء مكتبات Firebase (الإصدار المتوافق مع المتصفح) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <style>
 :root { --primary-color: #1e293b; --accent-color: #2563eb; --bg-color: #f1f5f9; --border-color: #cbd5e1; --danger-color: #ef4444; --success-color: #16a34a; }
 * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
@@ -381,6 +385,23 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
 </div>
 
 <script>
+// --- إعدادات Firebase وتفعيله ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDopYhY0QaxB-GQdAKQXDFz0ib1mlGyNRI",
+  authDomain: "alwaddy-4eee6.firebaseapp.com",
+  projectId: "alwaddy-4eee6",
+  storageBucket: "alwaddy-4eee6.firebasestorage.app",
+  messagingSenderId: "40515973626",
+  appId: "1:40515973626:web:63c0df828eeea516783443",
+  measurementId: "G-D6MZ1LYXW0",
+  databaseURL: "https://alwaddy-4eee6-default-rtdb.firebaseio.com"
+};
+
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+
 const STORAGE_LESSONS = 'SCHEDULE_LESSONS_PERMANENT_V6';
 const STORAGE_PATROL = 'SCHEDULE_PATROL_PERMANENT_V6';
 const STORAGE_RULES = 'TEACHERS_RULES_PERMANENT_V6';
@@ -619,6 +640,27 @@ function initData() {
     lessonsData = lData ? JSON.parse(lData) : createEmptyLessonsStructure();
     patrolData = pData ? JSON.parse(pData) : createEmptyPatrolStructure();
 
+    // الاستماع للتعديلات الفورية من Firebase الحساب أونلاين
+    db.ref('school_schedule').on('value', (snapshot) => {
+        const cloudData = snapshot.val();
+        if (cloudData) {
+            if (cloudData.lessonsData) lessonsData = cloudData.lessonsData;
+            if (cloudData.patrolData) patrolData = cloudData.patrolData;
+            if (cloudData.TEACHER_RULES) TEACHER_RULES = cloudData.TEACHER_RULES;
+            if (cloudData.teachers) teachers = cloudData.teachers;
+            if (cloudData.classes) classes = cloudData.classes;
+
+            // حفظ للتخزين المحلي للاستخدام عند انقطاع النت (Offline)
+            localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
+            localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
+            localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
+            localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
+
+            renderVerticalSchedule();
+            detectConflicts();
+        }
+    });
+
     renderVerticalSchedule();
     detectConflicts();
     updateUIState();
@@ -650,6 +692,19 @@ function saveData() {
     localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
     localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
     localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
+
+    // الحفظ المباشر أونلاين على Firebase Cloud
+    db.ref('school_schedule').set({
+        lessonsData: lessonsData,
+        patrolData: patrolData,
+        TEACHER_RULES: TEACHER_RULES,
+        teachers: teachers,
+        classes: classes
+    }).then(() => {
+        console.log("تمت المزامنة أونلاين بنجاح");
+    }).catch((err) => {
+        console.error("خطأ المزامنة:", err);
+    });
 }
 
 function switchView(view) {
