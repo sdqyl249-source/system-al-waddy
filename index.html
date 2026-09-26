@@ -60,7 +60,6 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 .nav-tab { padding: 10px 20px; background-color: white; border: 1px solid var(--border-color); border-radius: 8px; font-weight: 800; font-size: 14.5px; cursor: pointer; transition: 0.2s; flex: 1 1 auto; text-align: center; }
 .nav-tab.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
 
-/* التقارير والتضاربات */
 .report-card { background: #ffffff; border-radius: 12px; padding: 18px 22px; margin-bottom: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: none; }
 .report-title { font-size: 16px; font-weight: 800; color: var(--primary-color); margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; flex-wrap: wrap; gap: 5px; }
 .admin-badge-tag { background-color: #fef3c7; color: #b45309; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 800; }
@@ -73,7 +72,7 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 .conflict-panel { background-color: #fef2f2; border-right: 5px solid var(--danger-color); color: #991b1b; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: none; font-size: 14px; line-height: 1.6; box-shadow: 0 2px 6px rgba(239, 68, 68, 0.1); }
 .vertical-container { display: flex; flex-direction: column; gap: 20px; }
 
-/* التصميم والألوان لكروت الصفوف */
+/* الألوان والكروت */
 .class-section-card { border-radius: 10px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08); overflow: hidden; background: #fff; }
 .table-responsive-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
@@ -136,44 +135,24 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
 .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; max-height: 120px; overflow-y: auto; border: 1px solid #e2e8f0; padding: 8px; border-radius: 6px; }
 .checkbox-item { font-size: 12.5px; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 4px; }
 
-@media (max-width: 768px) {
-  body { padding: 10px; }
-  .wall-qr-section { flex-direction: column; text-align: center; gap: 10px; }
-  .wall-qr-info { max-width: 100%; }
-  .app-bar { padding: 12px 15px; }
-  .btn { width: 100%; font-size: 13px; padding: 10px; }
-  .btn-group { flex-direction: column; gap: 6px; }
-  .modal-content { padding: 15px; }
-}
-
 @media print { 
-  .app-bar, .navigation-tabs, .btn-group, .btn-auth, .conflict-panel, .report-card, .wall-qr-section, .modal-overlay { 
-      display: none !important; 
-  } 
-  html, body { width: 100% !important; height: auto !important; margin: 0 !important; padding: 0 !important; background: white !important; overflow: visible !important; } 
-  .vertical-container { display: block !important; gap: 0 !important; overflow: visible !important; }
-  .class-section-card { page-break-before: always !important; page-break-after: always !important; break-before: page !important; break-after: page !important; break-inside: avoid !important; margin: 0 0 20px 0 !important; padding: 10px !important; width: 100% !important; box-sizing: border-box !important; border: 2px solid #000 !important; box-shadow: none !important; background: white !important; } 
-  .class-section-card:first-child { page-break-before: avoid !important; break-before: avoid !important; }
-  .table-responsive-wrapper { width: 100% !important; overflow: visible !important; }
-  .vertical-table { width: 100% !important; border-collapse: collapse !important; }
-  .vertical-table th, .day-title-col, td.cell-slot { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
-  .vertical-table th { font-size: 16px !important; padding: 12px 6px !important; }
-  .vertical-table td { padding: 12px 6px !important; }
-  .subject-title { font-size: 16px !important; font-weight: bold !important; }
-  .teacher-name { font-size: 14px !important; font-weight: bold !important; }
+  .app-bar, .navigation-tabs, .btn-group, .btn-auth, .conflict-panel, .report-card, .wall-qr-section, .modal-overlay { display: none !important; } 
+  html, body { width: 100% !important; height: auto !important; margin: 0 !important; padding: 0 !important; background: white !important; } 
+  .vertical-container { display: block !important; }
+  .class-section-card { page-break-after: always !important; border: 2px solid #000 !important; margin-bottom: 20px !important; } 
 }
 </style>
 </head>
 <body>
 
-<!-- قسم رمز QR المخصص للتثبيت على الجدار -->
+<!-- قسم رمز QR المخصص للعمل أوفلاين مع توليد كود تلقائي -->
 <div class="wall-qr-section">
     <div class="wall-qr-info">
-        <h3>📱 رمز الوصول المباشر للجدول (صالح للطباعة والتعليق على الجدار)</h3>
-        <p>بمجرد مسح هذا الرمز بكاميرا الهاتف، سيفتح الجدول المحدث فوراً ويعمل في حالة توفر الإنترنت أو <strong>بدون إنترنت إطلاقاً (Offline)</strong>.</p>
+        <h3>📱 رمز الوصول المباشر للجدول والمراقبة (يعمل بدون إنترنت Offline)</h3>
+        <p>قم بمسح الباركود للوصول المباشر للجدول. تم حفظ البيانات محلياً لتشغيل النظام حتى عند عدم توفر الإنترنت.</p>
     </div>
     <div class="qr-display-box">
-        <img src="qr%20codepng.jpeg" alt="QR Code" style="width: 110px; height: 110px; object-fit: contain;" onerror="this.onerror=null; this.src='qr codepng.jpeg';">
+        <div id="qrCanvas"></div>
         <span style="font-size: 11px; font-weight: 800; color: #1e3a8a; margin-top: 4px;">مسح للفتح المباشر</span>
     </div>
 </div>
@@ -187,34 +166,19 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
         <button class="btn btn-auth" style="width: auto;" onclick="openAuthModal()">🔑 تسجيل الدخول / تغيير الصلاحية</button>
     </div>
     <div class="btn-group">
-        <button class="btn btn-manage admin-only" onclick="openTeachersConfigModal()">👨‍🏫 إدارة بيانات وقواعد المعلمين</button>
-        <button class="btn btn-notify admin-only" onclick="sendGlobalNotification()">🔔 إرسال الإشعارات الشاملة</button>
-        <button class="btn btn-print" onclick="window.print()">🖨️ طباعة أفقي (كل شعبة في صفحة)</button>
+        <button class="btn btn-manage admin-only" onclick="openTeachersConfigModal()">👨‍🏫 إدارة بيانات المعلمين وقواعد المراقبة</button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ طباعة الجدول</button>
         <button class="btn btn-danger admin-only" onclick="resetAllData()">🔄 تفريغ الجدول</button>
     </div>
 </div>
 
 <div class="navigation-tabs">
     <button id="tabLessons" class="nav-tab active" onclick="switchView('lessons')">📚 جدول الدروس الأسبوعي</button>
-    <button id="tabPatrol" class="nav-tab" onclick="switchView('patrol')">🛡️ جدول مراقبة الساحة والممرات</button>
-</div>
-
-<div id="adminReportCard" class="report-card">
-    <div class="report-title">
-        <span>📊 تقرير الإدارة المفصل <span id="reportTabLabel" style="font-size: 13.5px; font-weight: 700; color: #64748b;">(جدول الدروس)</span></span>
-        <span class="admin-badge-tag">🔒 خاص بالإدارة فقط</span>
-    </div>
-    <div class="stats-grid" id="statsGrid"></div>
-    <div class="report-table-wrapper">
-        <table class="report-table">
-            <thead id="reportTableHeader"></thead>
-            <tbody id="reportTableBody"></tbody>
-        </table>
-    </div>
+    <button id="tabPatrol" class="nav-tab" onclick="switchView('patrol')">🛡️ جدول مراقبة الساحة والممرات الشامل</button>
 </div>
 
 <div id="conflictBanner" class="conflict-panel">
-    <strong style="font-size: 15px;">🚨 كاشف ومحدد مواقع التضارب الذكي:</strong>
+    <strong style="font-size: 15px;">🚨 تنبيهات التضارب وزيادة نصاب المراقبة:</strong>
     <div id="conflictList" style="margin-top: 5px;"></div>
 </div>
 
@@ -224,18 +188,17 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
 <div id="authModal" class="modal-overlay">
     <div class="modal-content" style="width: 400px;">
         <h3 style="font-weight: 800; margin-top:0;">تسجيل الدخول للنظام</h3>
-        <p style="font-size: 13px; color: #64748b;">سيتم حفظ تسجيل الدخول الخاص بك تلقائياً على هذا الجهاز.</p>
         <div style="margin-bottom: 12px;">
             <label style="font-weight: 700;">نوع الحساب:</label>
             <select id="authRoleSelect" class="form-control" onchange="togglePinInput()">
-                <option value="visitor">زائر (عرض المواد فقط بدون اسم المعلم)</option>
-                <option value="teacher">معلم (عرض المادة مع أسماء المعلمين)</option>
-                <option value="admin">مدير النظام (صلاحيات كاملة وتعديل)</option>
+                <option value="visitor">زائر (عرض)</option>
+                <option value="teacher">معلم (عرض أسماء المعلمين)</option>
+                <option value="admin">مدير النظام (تعديل وإدارة كاملة)</option>
             </select>
         </div>
         <div id="pinGroup" style="margin-bottom: 12px; display: none;">
             <label style="font-weight: 700;">رمز الدخول (PIN):</label>
-            <input type="password" id="authPinInput" class="form-control" placeholder="أدخل الرمز السرّي">
+            <input type="password" id="authPinInput" class="form-control" placeholder="أدخل الرمز">
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
             <button class="btn btn-save" style="width: auto;" onclick="processAuthLogin()">دخول</button>
@@ -244,82 +207,53 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
     </div>
 </div>
 
-<!-- مودال تعديل خلايا الجدول -->
+<!-- مودال تعديل خلايا الجدول والمراقبة -->
 <div id="cellModal" class="modal-overlay">
     <div class="modal-content">
         <h3 id="modalTitle" style="font-weight: 800; margin-top:0;">تعديل الخلية</h3>
         <div id="lessonFormGroup">
             <div style="margin-bottom: 12px;">
                 <label style="font-weight: 700;">المعلم المسؤول:</label>
-                <select id="teacherSelect" class="form-control" onchange="checkTeacherConflictAndFilter()"></select>
+                <select id="teacherSelect" class="form-control"></select>
             </div>
             <div style="margin-bottom: 12px;">
                 <label style="font-weight: 700;">المادة الدراسية:</label>
                 <select id="subjectSelect" class="form-control"></select>
             </div>
-            <div id="modalConflictWarning" style="display: none; background-color: #fee2e2; border: 1px solid #f87171; color: #991b1b; padding: 10px; border-radius: 6px; font-weight: 700; font-size: 13px; margin-top: 10px;"></div>
         </div>
         <div id="patrolFormGroup" style="display: none;">
             <div style="margin-bottom: 12px;">
-                <label style="font-weight: 700;">المراقب الأول:</label>
+                <label style="font-weight: 700;">المراقب المكلف:</label>
                 <select id="patrolTeacher1Select" class="form-control"></select>
-            </div>
-            <div style="margin-bottom: 12px;">
-                <label style="font-weight: 700;">المراقب الثاني (اختياري):</label>
-                <select id="patrolTeacher2Select" class="form-control"></select>
             </div>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-            <button class="btn btn-save" style="width: auto;" onclick="applyCellEdit()">حفظ التعديلات المباشرة</button>
+            <button class="btn btn-save" style="width: auto;" onclick="applyCellEdit()">حفظ التعديلات</button>
             <button class="btn btn-danger" style="width: auto;" onclick="closeModal()">إلغاء</button>
         </div>
     </div>
 </div>
 
-<!-- مودال لوحة إدارة المعلمين والقواعد -->
+<!-- مودال إدارة المعلمين والمراقبة -->
 <div id="teachersConfigModal" class="modal-overlay">
     <div class="modal-content" style="width: 720px;">
-        <h3 style="font-weight: 800; margin-top:0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">⚙️ قاعدة بيانات المعلمين والتوزيع</h3>
+        <h3 style="font-weight: 800; margin-top:0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">⚙️ إدارة البيانات والكادر التعليمي</h3>
+        
         <div style="background-color: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px;">
-            <h4 style="margin-top: 0; margin-bottom: 10px; color: var(--accent-color);">بيانات المعلم والارتباطات</h4>
-            <input type="hidden" id="editTeacherIndex" value="-1">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                <div>
-                    <label style="font-size: 13px; font-weight: 700;">المعلم</label>
-                    <select id="selectTeacherName" class="form-control" onchange="onTeacherSelected(this.value)"></select>
-                    <input type="text" id="inputCustomTeacherName" class="form-control" placeholder="أدخل اسم معلم جديد..." style="display: none; margin-top: 5px;">
-                </div>
-                <div>
-                    <label style="font-size: 13px; font-weight: 700;">إضافة معلم جديد للأنظمة</label>
-                    <input type="text" id="inputNewStaffName" class="form-control" placeholder="اسم المعلم الجديد">
-                    <button class="btn btn-save" style="width:auto; margin-top:5px;" onclick="addStaffMember()">+ إضافة للكادر</button>
-                </div>
-            </div>
-            <div style="margin-bottom: 10px;">
-                <label style="font-size: 13px; font-weight: 700;">المادة الدراسية</label>
-                <select id="assignmentSubjectSelect" class="form-control" onchange="renderLinkedClassCheckboxes()">
-                    <option value="">-- اختر المادة --</option>
-                </select>
-            </div>
-            <div style="margin-bottom:10px; background:#eef6ff; padding:10px; border-radius:8px;">
-                <label style="font-size:13px; font-weight:700;">الصف والشعب المرتبطة بالمادة</label>
-                <div class="checkbox-group" id="linkedClassCheckboxContainer" style="margin-top:8px;"></div>
-            </div>
-            <div style="display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; flex-wrap: wrap;">
-                <button class="btn btn-save" style="width: auto;" onclick="saveTeacherRule()">💾 حفظ الارتباط المباشر</button>
-                <button class="btn btn-danger" style="width: auto;" onclick="clearTeacherForm()">إلغاء النموذج</button>
+            <h4 style="margin-top: 0; margin-bottom: 10px; color: var(--accent-color);">إضافة معلم جديد للنظام</h4>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="inputNewStaffName" class="form-control" placeholder="اسم المعلم الجديد كاملًا">
+                <button class="btn btn-save" style="width:auto; white-space:nowrap;" onclick="addStaffMember()">+ إضافة للمعلمين</button>
             </div>
         </div>
 
-        <h4 style="margin-bottom: 8px;">قائمة المعلمين المعتمدة في النظام (<span id="teacherRulesCount">0</span>):</h4>
-        <div class="report-table-wrapper" style="max-height: 200px;">
+        <h4 style="margin-bottom: 8px;">قائمة الكادر المعتمد واستحقاق المراقبة (<span id="teacherRulesCount">0</span> معلم):</h4>
+        <div class="report-table-wrapper" style="max-height: 250px;">
             <table class="report-table">
                 <thead>
                     <tr>
-                        <th>المعلم</th>
-                        <th>المواد</th>
-                        <th>الصفوف والشُعب</th>
-                        <th>الحصص الفعلية</th>
+                        <th>اسم المعلم</th>
+                        <th>أيام المراقبة الحالية</th>
                         <th>إجراءات</th>
                     </tr>
                 </thead>
@@ -332,32 +266,8 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
     </div>
 </div>
 
-<!-- 🔥 استدعاء مكتبة Firebase أونلاين بصيغة JS Modules والتفعيل الفوري الشامل للمزامنة -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-// إعدادات Firebase الخاصة بتطبيق منصة الوادي
-const firebaseConfig = {
-  apiKey: "AIzaSyDopYhY0QaxB-GQdAKQXDFz0ib1mlGyNRI",
-  authDomain: "alwaddy-4eee6.firebaseapp.com",
-  projectId: "alwaddy-4eee6",
-  storageBucket: "alwaddy-4eee6.firebasestorage.app",
-  messagingSenderId: "40515973626",
-  appId: "1:40515973626:web:63c0df828eeea516783443",
-  measurementId: "G-D6MZ1LYXW0",
-  databaseURL: "https://alwaddy-4eee6-default-rtdb.firebaseio.com"
-};
-
-// تهيئة Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-const STORAGE_LESSONS = 'SCHEDULE_LESSONS_PERMANENT_V6';
-const STORAGE_PATROL = 'SCHEDULE_PATROL_PERMANENT_V6';
-const STORAGE_RULES = 'TEACHERS_RULES_PERMANENT_V6';
-const STORAGE_CONFIG = 'SCHOOL_CONFIG_PERMANENT_V6';
-
+<script>
+// المفاتيح والأرقام السرية
 const ADMIN_PIN = "19801234";
 const TEACHER_PIN = "19801980";
 
@@ -365,6 +275,18 @@ let currentRole = localStorage.getItem("USER_ROLE_SAVED") || "visitor";
 let currentView = 'lessons';
 
 const weekDays = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس"];
+
+// أماكن المراقبة الـ 7 المحصورة
+const patrolZones = [
+    "ممر السادس",
+    "ممر العلوي الخامس",
+    "ممر الأول",
+    "الممر العلوي الثالث",
+    "وسط الساحة",
+    "جهة الروضة",
+    "جهة المخزن"
+];
+
 let classes = [
     "الأول - أ", "الأول - ب",
     "الثاني - أ", "الثاني - ب", "الثاني - ج",
@@ -373,12 +295,10 @@ let classes = [
     "الخامس - أ", "الخامس - ب", "الخامس - ج", "الخامس - د", "الخامس - هـ",
     "السادس - أ", "السادس - ب"
 ];
-let patrolZones = ["الساحة - جهة الروضة", "الساحة - مركز الساحة", "الساحة - جهة المخزن", "الممر - العلوي الأول", "الممر - العلوي السادس", "الممر - السفلي الأول", "الممر - السفلي السادس"];
 
 let allSubjects = ["التربية الإسلامية", "اللغة العربية", "اللغة الإنكليزية", "الرياضيات", "العلوم", "الاجتماعيات", "الأخلاقية", "رياضة", "فنية ونشيد"];
-let primarySubjects = ["التربية الإسلامية", "اللغة العربية", "اللغة الإنكليزية", "الرياضيات", "العلوم", "الأخلاقية", "رياضة", "فنية ونشيد"];
-let upperSubjects = ["التربية الإسلامية", "اللغة العربية", "اللغة الإنكليزية", "الرياضيات", "العلوم", "الاجتماعيات", "رياضة", "فنية ونشيد"];
 
+// قائمة المعلمين الـ 27 الافتراضية
 let teachers = [
   "أ. عقيل سعد عامر", "أ. علي أحمد عبد الزهرة", "أ. كوثر جاسم اخميس", "أ. عبد الوهاب محمود شاكر", 
   "أ. زينة جبر راضي", "أ. ليلى بدر عبود", "أ. أم كلثوم علي عيسى", "أ. تبارك خيري رسن", 
@@ -389,174 +309,29 @@ let teachers = [
   "أ. صادق يونس محمد", "أ. نورا أسعد كامل", "أ. قاسم محمود"
 ];
 
-let TEACHER_RULES = [];
 let lessonsData = {}, patrolData = {}, activeCellInfo = null;
 
-function getTeachersList() { 
-    if (TEACHER_RULES && TEACHER_RULES.length > 0) {
-        return TEACHER_RULES.map(t => t.name).filter(name => name && name.trim() !== "");
-    }
-    return teachers;
-}
+// التهيئة وحفظ البيانات أوفلاين
+function initData() {
+    let savedTeachers = localStorage.getItem("TEACHERS_LIST_PERMANENT");
+    if (savedTeachers) teachers = JSON.parse(savedTeachers);
 
-function calculateTeacherAllocatedQuota() {
-    let counts = {};
-    getTeachersList().forEach(t => counts[t] = 0);
-    weekDays.forEach(day => {
-        classes.forEach(cls => {
-            for (let slot = 1; slot <= 4; slot++) {
-                let cell = lessonsData[day] && lessonsData[day][cls] ? lessonsData[day][cls][slot] : null;
-                if (cell && cell.teacher && cell.teacher.trim() !== "") {
-                    counts[cell.teacher] = (counts[cell.teacher] || 0) + 1;
-                }
-            }
-        });
-    });
-    return counts;
-}
+    let savedLessons = localStorage.getItem("SCHEDULE_LESSONS_PERMANENT");
+    lessonsData = savedLessons ? JSON.parse(savedLessons) : createEmptyLessonsStructure();
 
-window.sendGlobalNotification = function() {
-    if (currentRole !== 'admin') return;
-    alert(`📢 تم إرسال إشعار شامل لكافة المستخدمين بالتحديثات الأخيرة.`);
-};
+    let savedPatrol = localStorage.getItem("SCHEDULE_PATROL_PERMANENT");
+    patrolData = savedPatrol ? JSON.parse(savedPatrol) : createEmptyPatrolStructure();
 
-window.openAuthModal = function() {
-    document.getElementById("authRoleSelect").value = currentRole;
-    window.togglePinInput();
-    document.getElementById("authModal").style.display = "flex";
-};
-
-window.closeAuthModal = function() {
-    document.getElementById("authModal").style.display = "none";
-};
-
-window.togglePinInput = function() {
-    const role = document.getElementById("authRoleSelect").value;
-    const pinGroup = document.getElementById("pinGroup");
-    if (role === "admin" || role === "teacher") {
-        pinGroup.style.display = "block";
-    } else {
-        pinGroup.style.display = "none";
-    }
-};
-
-window.processAuthLogin = function() {
-    const role = document.getElementById("authRoleSelect").value;
-    const pin = document.getElementById("authPinInput").value.trim();
-
-    if (role === "admin") {
-        if (pin === ADMIN_PIN) {
-            currentRole = "admin";
-            alert("تم تسجيل الدخول كـ مدير النظام بنجاح!");
-        } else {
-            return alert("رمز المدير غير صحيح!");
-        }
-    } else if (role === "teacher") {
-        if (pin === TEACHER_PIN) {
-            currentRole = "teacher";
-            alert("تم تسجيل الدخول كـ معلم بنجاح!");
-        } else {
-            return alert("رمز المعلم غير صحيح!");
-        }
-    } else {
-        currentRole = "visitor";
-        alert("تم التعيين كـ زائر بنجاح.");
-    }
-
-    localStorage.setItem("USER_ROLE_SAVED", currentRole);
-    window.closeAuthModal();
     updateUIState();
-};
-
-function detectConflicts() {
-    let conflicts = [];
-    weekDays.forEach(day => {
-        for (let slot = 1; slot <= 4; slot++) {
-            let map = {};
-            classes.forEach(cls => {
-                let cell = lessonsData[day] && lessonsData[day][cls] ? lessonsData[day][cls][slot] : null;
-                if (cell && cell.teacher && cell.teacher.trim() !== "") {
-                    if (!map[cell.teacher]) map[cell.teacher] = [];
-                    map[cell.teacher].push(cls);
-                }
-            });
-            for (let t in map) {
-                if (map[t].length > 1) {
-                    conflicts.push(`يوم <b>${day}</b> (الحصة <b>${slot}</b>): المعلم <b>${t}</b> معين في شعبتين بنفس الوقت: (${map[t].join("، ")})`);
-                }
-            }
-        }
-    });
-
-    const banner = document.getElementById("conflictBanner");
-    const listDiv = document.getElementById("conflictList");
-    if (banner && listDiv) {
-        if (conflicts.length > 0 && currentRole === 'admin') {
-            banner.style.display = "block";
-            listDiv.innerHTML = conflicts.map(c => `• ${c}`).join("<br>");
-        } else {
-            banner.style.display = "none";
-            listDiv.innerHTML = "";
-        }
-    }
+    generateOfflineQR();
 }
 
-function updateUIState() {
-    const badge = document.getElementById("roleBadge");
-    const reportCard = document.getElementById("adminReportCard");
-
-    if (currentRole === "admin") {
-        badge.innerText = "المود: مدير النظام (إدارة كاملة)"; badge.className = "role-badge role-admin";
-        document.querySelectorAll(".admin-only").forEach(el => el.style.display = "inline-flex");
-        reportCard.style.display = "block";
-    } else if (currentRole === "teacher") {
-        badge.innerText = "المود: معلم (عرض الجدول والطباعة)"; badge.className = "role-badge role-teacher";
-        document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
-        reportCard.style.display = "none";
-    } else {
-        badge.innerText = "المود: زائر (عرض المواد والطباعة)"; badge.className = "role-badge role-visitor";
-        document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
-        reportCard.style.display = "none";
-    }
+function saveData() {
+    localStorage.setItem("TEACHERS_LIST_PERMANENT", JSON.stringify(teachers));
+    localStorage.setItem("SCHEDULE_LESSONS_PERMANENT", JSON.stringify(lessonsData));
+    localStorage.setItem("SCHEDULE_PATROL_PERMANENT", JSON.stringify(patrolData));
     renderVerticalSchedule();
     detectConflicts();
-}
-
-function renderVerticalSchedule() {
-    const container = document.getElementById('scheduleContainer');
-    if (!container) return;
-    const source = currentView === 'lessons' ? lessonsData : patrolData;
-    const items = currentView === 'lessons' ? classes : patrolZones;
-    container.innerHTML = '';
-    
-    items.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'class-section-card' + (currentView === 'patrol' ? ' patrol-card' : '');
-        card.dataset.class = item;
-        let html = `<div class="class-header"><span>${item}</span><span>${currentView === 'lessons' ? 'جدول الدروس' : 'المراقبة'}</span></div><div class="table-responsive-wrapper"><table class="vertical-table"><thead><tr><th>اليوم</th>${[1,2,3,4].map(x=>`<th>الحصة ${x}</th>`).join('')}</tr></thead><tbody>`;
-        
-        weekDays.forEach(day => {
-            html += `<tr><td class="day-title-col">${day}</td>`;
-            for (let slot=1; slot<=4; slot++) {
-                if (currentView === 'lessons') {
-                    const cell = source?.[day]?.[item]?.[slot] || {subject:'-',teacher:''};
-                    const showTeacher = (currentRole === 'admin' || currentRole === 'teacher');
-                    const teacherDisplay = showTeacher ? (cell.teacher || '') : '';
-                    
-                    html += `<td class="cell-slot" onclick="openCellModal('${day}','${item}',${slot})"><div class="subject-title">${cell.subject || '-'}</div>${teacherDisplay ? `<div class="teacher-name">${teacherDisplay}</div>` : ''}</td>`;
-                } else {
-                    const ts = source?.[day]?.[item]?.teachers || [];
-                    const showTeacher = (currentRole === 'admin' || currentRole === 'teacher');
-                    const teachersDisplay = showTeacher ? ts.join('<br>') : 'محدد';
-                    
-                    html += `<td class="cell-slot" onclick="openPatrolModal('${day}','${item}')"><div class="teacher-name">${teachersDisplay || '-'}</div></td>`;
-                }
-            }
-            html += '</tr>';
-        });
-        card.innerHTML = html + '</tbody></table></div>';
-        container.appendChild(card);
-    });
 }
 
 function createEmptyLessonsStructure() {
@@ -575,175 +350,139 @@ function createEmptyPatrolStructure() {
     let struct = {};
     weekDays.forEach(day => {
         struct[day] = {};
-        patrolZones.forEach(zone => { struct[day][zone] = { teachers: [] }; });
+        patrolZones.forEach(zone => { struct[day][zone] = { teacher: "" }; });
     });
     return struct;
 }
 
-function initData() {
-    let lData = localStorage.getItem(STORAGE_LESSONS);
-    let pData = localStorage.getItem(STORAGE_PATROL);
-    let rData = localStorage.getItem(STORAGE_RULES);
-    let cData = localStorage.getItem(STORAGE_CONFIG);
-
-    if (cData) { try { const cfg = JSON.parse(cData); if (Array.isArray(cfg.classes) && cfg.classes.length) classes = cfg.classes; if (Array.isArray(cfg.teachers) && cfg.teachers.length) teachers = cfg.teachers; } catch(e) {} }
-
-    TEACHER_RULES = rData ? JSON.parse(rData) : [];
-    lessonsData = lData ? JSON.parse(lData) : createEmptyLessonsStructure();
-    patrolData = pData ? JSON.parse(pData) : createEmptyPatrolStructure();
-
-    // 🔥 الاستماع والتحديث الفوري عند أي تعديل أونلاين عبر السحابة Realtime
-    const scheduleRef = ref(db, 'school_schedule');
-    onValue(scheduleRef, (snapshot) => {
-        const cloudData = snapshot.val();
-        if (cloudData) {
-            if (cloudData.lessonsData) lessonsData = cloudData.lessonsData;
-            if (cloudData.patrolData) patrolData = cloudData.patrolData;
-            if (cloudData.TEACHER_RULES) TEACHER_RULES = cloudData.TEACHER_RULES;
-            if (cloudData.teachers) teachers = cloudData.teachers;
-            if (cloudData.classes) classes = cloudData.classes;
-
-            // تحديث التخزين المحلي للاستخدام عند انقطاع الشبكة
-            localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
-            localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
-            localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
-            localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
-
-            renderVerticalSchedule();
-            detectConflicts();
-            if (currentRole === 'admin' && document.getElementById("teachersConfigModal").style.display === "flex") {
-                renderTeacherRulesTable();
+// حساب عدد أيام مراقبة المعلم (المشروط بألا يتجاوز يومين)
+function getTeacherPatrolDaysCount(teacherName) {
+    let count = 0;
+    weekDays.forEach(day => {
+        let assignedInDay = false;
+        patrolZones.forEach(zone => {
+            if (patrolData[day]?.[zone]?.teacher === teacherName) {
+                assignedInDay = true;
             }
+        });
+        if (assignedInDay) count++;
+    });
+    return count;
+}
+
+// كشف التضارب وتنبيه شرط اليومين للمراقبة
+function detectConflicts() {
+    let conflicts = [];
+    
+    // فحص شرط اليومين في جدول المراقبة
+    teachers.forEach(t => {
+        let pDays = getTeacherPatrolDaysCount(t);
+        if (pDays > 2) {
+            conflicts.push(`المعلم <b>${t}</b> تم تكليفه بالمراقبة في (<b>${pDays}</b> أيام)، وهو يتجاوز الحد المسموح (يومين فقط).`);
         }
     });
 
-    renderVerticalSchedule();
-    detectConflicts();
-    updateUIState();
+    const banner = document.getElementById("conflictBanner");
+    const listDiv = document.getElementById("conflictList");
+    if (banner && listDiv) {
+        if (conflicts.length > 0 && currentRole === 'admin') {
+            banner.style.display = "block";
+            listDiv.innerHTML = conflicts.map(c => `• ${c}`).join("<br>");
+        } else {
+            banner.style.display = "none";
+            listDiv.innerHTML = "";
+        }
+    }
 }
 
-function saveData() {
-    // 1. الحفظ في الذاكرة المحلية للجهاز الحالي
-    localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
-    localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
-    localStorage.setItem(STORAGE_RULES, JSON.stringify(TEACHER_RULES));
-    localStorage.setItem(STORAGE_CONFIG, JSON.stringify({ classes, teachers }));
-
-    // 2. إرسال البيانات أونلاين لتتحدث فوراً عند كل الأجهزة
-    set(ref(db, 'school_schedule'), {
-        lessonsData: lessonsData,
-        patrolData: patrolData,
-        TEACHER_RULES: TEACHER_RULES,
-        teachers: teachers,
-        classes: classes
-    }).then(() => {
-        console.log("تم التحديث أونلاين بنجاح لكافة الأجهزة");
-    }).catch((err) => {
-        console.error("خطأ المزامنة السحابية:", err);
-    });
+// إدارة العرض والواجهات
+function renderVerticalSchedule() {
+    const container = document.getElementById('scheduleContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (currentView === 'lessons') {
+        classes.forEach(cls => {
+            const card = document.createElement('div');
+            card.className = 'class-section-card';
+            card.dataset.class = cls;
+            let html = `<div class="class-header"><span>${cls}</span><span>جدول الدروس</span></div><div class="table-responsive-wrapper"><table class="vertical-table"><thead><tr><th>اليوم</th>${[1,2,3,4].map(x=>`<th>الحصة ${x}</th>`).join('')}</tr></thead><tbody>`;
+            
+            weekDays.forEach(day => {
+                html += `<tr><td class="day-title-col">${day}</td>`;
+                for (let slot=1; slot<=4; slot++) {
+                    const cell = lessonsData?.[day]?.[cls]?.[slot] || {subject:'-',teacher:''};
+                    const showTeacher = (currentRole === 'admin' || currentRole === 'teacher');
+                    const teacherDisplay = showTeacher ? (cell.teacher || '') : '';
+                    html += `<td class="cell-slot" onclick="openCellModal('${day}','${cls}',${slot})"><div class="subject-title">${cell.subject || '-'}</div>${teacherDisplay ? `<div class="teacher-name">${teacherDisplay}</div>` : ''}</td>`;
+                }
+                html += '</tr>';
+            });
+            card.innerHTML = html + '</tbody></table></div>';
+            container.appendChild(card);
+        });
+    } else {
+        // عرض جدول المراقبة الشامل الوحيد لجميع الأماكن الـ 7
+        const card = document.createElement('div');
+        card.className = 'class-section-card patrol-card';
+        let html = `<div class="class-header"><span>جدول المراقبة الميدانية الشامل (7 أماكن)</span><span>من الأحد للخميس</span></div><div class="table-responsive-wrapper"><table class="vertical-table"><thead><tr><th>المكان / اليوم</th>${weekDays.map(d=>`<th>${d}</th>`).join('')}</tr></thead><tbody>`;
+        
+        patrolZones.forEach(zone => {
+            html += `<tr><td class="day-title-col">${zone}</td>`;
+            weekDays.forEach(day => {
+                const teacher = patrolData?.[day]?.[zone]?.teacher || '';
+                const showTeacher = (currentRole === 'admin' || currentRole === 'teacher');
+                const display = showTeacher ? (teacher || '-') : (teacher ? 'مكلف' : '-');
+                html += `<td class="cell-slot" onclick="openPatrolModal('${day}','${zone}')"><div class="teacher-name">${display}</div></td>`;
+            });
+            html += '</tr>';
+        });
+        card.innerHTML = html + '</tbody></table></div>';
+        container.appendChild(card);
+    }
 }
 
-window.switchView = function(view) {
+function switchView(view) {
     currentView = view;
     document.getElementById("tabLessons").classList.toggle("active", view === 'lessons');
     document.getElementById("tabPatrol").classList.toggle("active", view === 'patrol');
     renderVerticalSchedule();
-};
+}
 
-function isPrimaryClass(cls) { return cls.startsWith("الأول") || cls.startsWith("الثاني") || cls.startsWith("الثالث"); }
-
-window.openCellModal = function(day, cls, slot) {
+// النوافذ المنبثقة للخلية والتعديل
+function openCellModal(day, cls, slot) {
     if (currentRole !== 'admin') return;
     activeCellInfo = { type: 'lesson', day, cls, slot };
     document.getElementById("modalTitle").innerText = `تعديل درس: ${cls} - ${day} (الدرس ${slot})`;
     document.getElementById("lessonFormGroup").style.display = "block";
     document.getElementById("patrolFormGroup").style.display = "none";
-    document.getElementById("modalConflictWarning").style.display = "none";
 
-    let cell = (lessonsData[day] && lessonsData[day][cls] && lessonsData[day][cls][slot]) ? lessonsData[day][cls][slot] : { subject: "-", teacher: "" };
-
-    let subSel = document.getElementById("subjectSelect");
+    let cell = lessonsData[day]?.[cls]?.[slot] || { subject: "-", teacher: "" };
     let tSel = document.getElementById("teacherSelect");
-    tSel.innerHTML = '<option value="">- لا يوجد معلم -</option>';
-    getTeachersList().forEach(t => {
-        let opt = document.createElement("option");
-        opt.value = t; opt.innerText = t;
-        if (t === cell.teacher) opt.selected = true;
-        tSel.appendChild(opt);
-    });
+    let sSel = document.getElementById("subjectSelect");
+
+    tSel.innerHTML = '<option value="">- لا يوجد معلم -</option>' + teachers.map(t=>`<option value="${t}" ${t===cell.teacher?'selected':''}>${t}</option>`).join('');
+    sSel.innerHTML = '<option value="-">- فارغ -</option>' + allSubjects.map(s=>`<option value="${s}" ${s===cell.subject?'selected':''}>${s}</option>`).join('');
 
     document.getElementById("cellModal").style.display = "flex";
-    window.checkTeacherConflictAndFilter();
-    subSel.value = cell.subject || "-";
-};
+}
 
-window.checkTeacherConflictAndFilter = function() {
-    filterSubjectsByTeacher();
-    if (!activeCellInfo || activeCellInfo.type !== 'lesson') return;
-
-    const teacher = document.getElementById("teacherSelect").value;
-    const warningDiv = document.getElementById("modalConflictWarning");
-    if (!teacher) {
-        warningDiv.style.display = "none";
-        return;
-    }
-
-    const { day, cls, slot } = activeCellInfo;
-    let conflictingClass = "";
-
-    classes.forEach(c => {
-        if (c !== cls) {
-            let cell = lessonsData[day] && lessonsData[day][c] ? lessonsData[day][c][slot] : null;
-            if (cell && cell.teacher === teacher) {
-                conflictingClass = c;
-            }
-        }
-    });
-
-    if (conflictingClass) {
-        warningDiv.style.display = "block";
-        warningDiv.innerHTML = `⚠️ <strong>تضارب في الجدول!</strong><br>المعلم <b>${teacher}</b> معين بالفعل في يوم (<b>${day}</b>) - (<b>الدرس ${slot}</b>) في شعبة (<b>${conflictingClass}</b>).`;
-    } else {
-        warningDiv.style.display = "none";
-    }
-};
-
-window.openPatrolModal = function(day, zone) {
+function openPatrolModal(day, zone) {
     if (currentRole !== 'admin') return;
     activeCellInfo = { type: 'patrol', day, zone };
-    document.getElementById("modalTitle").innerText = `تعديل المراقبين: ${zone} - ${day}`;
+    document.getElementById("modalTitle").innerText = `تعيين مراقب: ${zone} - ${day}`;
     document.getElementById("lessonFormGroup").style.display = "none";
     document.getElementById("patrolFormGroup").style.display = "block";
 
-    let cell = (patrolData[day] && patrolData[day][zone]) ? patrolData[day][zone] : { teachers: [] };
-    let t1 = cell.teachers[0] || "";
-    let t2 = cell.teachers[1] || "";
+    let currentTeacher = patrolData[day]?.[zone]?.teacher || "";
+    let pSel = document.getElementById("patrolTeacher1Select");
 
-    let p1 = document.getElementById("patrolTeacher1Select");
-    let p2 = document.getElementById("patrolTeacher2Select");
-
-    p1.innerHTML = '<option value="">- لا يوجد -</option>';
-    p2.innerHTML = '<option value="">- لا يوجد -</option>';
-
-    getTeachersList().forEach(t => {
-        let opt1 = document.createElement("option"); opt1.value = t; opt1.innerText = t;
-        if (t === t1) opt1.selected = true;
-        p1.appendChild(opt1);
-
-        let opt2 = document.createElement("option"); opt2.value = t; opt2.innerText = t;
-        if (t === t2) opt2.selected = true;
-        p2.appendChild(opt2);
-    });
+    pSel.innerHTML = '<option value="">- بدون مراقب -</option>' + teachers.map(t=>`<option value="${t}" ${t===currentTeacher?'selected':''}>${t}</option>`).join('');
 
     document.getElementById("cellModal").style.display = "flex";
-};
+}
 
-window.closeModal = function() {
-    document.getElementById("cellModal").style.display = "none";
-    activeCellInfo = null;
-};
-
-window.applyCellEdit = function() {
+function applyCellEdit() {
     if (!activeCellInfo) return;
     
     if (activeCellInfo.type === 'lesson') {
@@ -754,207 +493,156 @@ window.applyCellEdit = function() {
         if (!lessonsData[day]) lessonsData[day] = {};
         if (!lessonsData[day][cls]) lessonsData[day][cls] = {};
         lessonsData[day][cls][slot] = { subject: newSub, teacher: newTeacher };
-
     } else {
         let { day, zone } = activeCellInfo;
-        let t1 = document.getElementById("patrolTeacher1Select").value;
-        let t2 = document.getElementById("patrolTeacher2Select").value;
-        let list = [];
-        if (t1) list.push(t1);
-        if (t2) list.push(t2);
+        let newTeacher = document.getElementById("patrolTeacher1Select").value;
+        
+        // التحقق من عدم تجاوز شرط اليومين
+        if (newTeacher && getTeacherPatrolDaysCount(newTeacher) >= 2 && patrolData[day]?.[zone]?.teacher !== newTeacher) {
+            if (!confirm(`⚠️ تنبيه: المعلم (${newTeacher}) معين بالفعل في يومين مراقبة. هل تريد إضافته على أي حال؟`)) {
+                return;
+            }
+        }
+
         if (!patrolData[day]) patrolData[day] = {};
-        patrolData[day][zone] = { teachers: list };
+        patrolData[day][zone] = { teacher: newTeacher };
     }
     
     saveData();
-    window.closeModal();
-    renderVerticalSchedule();
-    detectConflicts();
-};
-
-window.openTeachersConfigModal = function() {
-    if (currentRole !== 'admin') return;
-    renderTeacherRulesTable();
-    populateTeacherSelectOptions();
-    renderAssignmentSubjectOptions("");
-    document.getElementById("teachersConfigModal").style.display = "flex";
-};
-
-window.closeTeachersConfigModal = function() {
-    document.getElementById("teachersConfigModal").style.display = "none";
-    window.clearTeacherForm();
-};
-
-function populateTeacherSelectOptions() {
-    const sel = document.getElementById("selectTeacherName");
-    sel.innerHTML = '<option value="">-- اختر اسم المعلم --</option>';
-    getTeachersList().forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
-    sel.innerHTML += '<option value="__custom__">+ إضافة معلم جديد باسم مخصص</option>';
+    closeModal();
 }
 
-window.onTeacherSelected = function(value) {
-    toggleCustomTeacherInput(value);
-    const rule = TEACHER_RULES.find(r => r.name === value);
-    renderAssignmentSubjectOptions(rule?.subjects?.[0] || "");
-};
-
-function toggleCustomTeacherInput(val) {
-    const customInput = document.getElementById("inputCustomTeacherName");
-    customInput.style.display = val === '__custom__' ? "block" : "none";
+function closeModal() {
+    document.getElementById("cellModal").style.display = "none";
+    activeCellInfo = null;
 }
 
-function getSelectedRuleSubjects() {
-    const sel = document.getElementById("assignmentSubjectSelect");
-    return sel ? [sel.value].filter(Boolean) : [];
-}
-
-function renderAssignmentSubjectOptions(selectedSubject = "") {
-    const sel = document.getElementById("assignmentSubjectSelect");
-    if (!sel) return;
-    sel.innerHTML = '<option value="">-- اختر المادة --</option>' + allSubjects.map(s => `<option value="${s}" ${s === selectedSubject ? "selected" : ""}>${s}</option>`).join("");
-    window.renderLinkedClassCheckboxes();
-}
-
-window.renderLinkedClassCheckboxes = function(selectedClasses = null) {
-    const subject = document.getElementById("assignmentSubjectSelect")?.value;
-    const container = document.getElementById("linkedClassCheckboxContainer");
-    if (!container) return;
-    const teacher = document.getElementById("selectTeacherName")?.value;
-    const rule = TEACHER_RULES.find(r => r.name === teacher) || window._editingRule || null;
-    const existing = selectedClasses || (rule?.subjectClasses?.[subject] || []);
-    if (!subject) {
-        container.innerHTML = '<small style="color:#64748b;">اختر المعلم ثم المادة لربط الشعب والصفوف المطلوبة.</small>';
-        return;
-    }
-    const grade = subject === "الاجتماعيات" ? ["الرابع", "الخامس", "السادس"] :
-        subject === "الأخلاقية" ? ["الأول", "الثاني", "الثالث"] : classes.map(c => c.split(" - ")[0]);
-    const allowed = [...new Set(classes.filter(c => grade.includes(c.split(" - ")[0])))];
-    container.innerHTML = allowed.map(c => `<label class="checkbox-item"><input type="checkbox" value="${c}" ${existing.includes(c) ? "checked" : ""}> ${c}</label>`).join("");
-};
-
-function filterSubjectsByTeacher() {
-    const teacher = document.getElementById("teacherSelect").value;
-    const rule = TEACHER_RULES.find(r => r.name === teacher);
-    const current = document.getElementById("subjectSelect").value;
-    const list = rule?.subjects?.length ? rule.subjects : (isPrimaryClass(activeCellInfo?.cls || "") ? primarySubjects : upperSubjects);
-    const sel = document.getElementById("subjectSelect");
-    sel.innerHTML = '<option value="-">- فارغ -</option>';
-    list.forEach(s => sel.innerHTML += `<option value="${s}">${s}</option>`);
-    if ([...sel.options].some(o => o.value === current)) sel.value = current;
-}
-
-window.addStaffMember = function() {
+// إدارة المعلمين (إضافة / حذف)
+function addStaffMember() {
     if (currentRole !== 'admin') return;
     const name = document.getElementById("inputNewStaffName").value.trim();
-    if (!name) return alert("اكتب اسم المعلم أولاً.");
-    if (!teachers.includes(name)) teachers.push(name);
-    if (!TEACHER_RULES.some(r => r.name === name)) TEACHER_RULES.push({ name, subjects: [], classes: [], maxQuota: 0 });
+    if (!name) return alert("يرجى كتابة اسم المعلم.");
+    if (teachers.includes(name)) return alert("المعلم موجود بالفعل.");
+
+    teachers.push(name);
     document.getElementById("inputNewStaffName").value = "";
-    populateTeacherSelectOptions(); renderTeacherRulesTable(); saveData();
-};
+    saveData();
+    renderTeacherRulesTable();
+    alert("تمت إضافة المعلم بنجاح.");
+}
 
-window.saveTeacherRule = function() {
+function deleteTeacher(index) {
     if (currentRole !== 'admin') return;
-    const editIndex = parseInt(document.getElementById("editTeacherIndex").value);
-    const selName = document.getElementById("selectTeacherName").value;
-    const customName = document.getElementById("inputCustomTeacherName").value.trim();
-    const name = selName === '__custom__' ? customName : selName;
-    if (!name) return alert("يرجى اختيار اسم المعلم.");
+    const teacherName = teachers[index];
+    if (confirm(`هل أنت متأكد من حذف المعلم (${teacherName}) نهائياً؟ سيتم إزالته أيضاً من الحصص والمراقبة.`)) {
+        teachers.splice(index, 1);
+        
+        // تنظيف جداول الدروس والمراقبة من اسم المعلم المحذوف
+        weekDays.forEach(day => {
+            classes.forEach(c => {
+                for(let s=1; s<=4; s++) {
+                    if (lessonsData[day]?.[c]?.[s]?.teacher === teacherName) {
+                        lessonsData[day][c][s].teacher = "";
+                    }
+                }
+            });
+            patrolZones.forEach(z => {
+                if (patrolData[day]?.[z]?.teacher === teacherName) {
+                    patrolData[day][z].teacher = "";
+                }
+            });
+        });
 
-    const selectedSubjects = getSelectedRuleSubjects();
-    const selectedClasses = [...document.querySelectorAll("#linkedClassCheckboxContainer input:checked")].map(el => el.value);
-    if (!selectedSubjects.length) return alert("اختر المادة الدراسية.");
-    if (!selectedClasses.length) return alert("اختر صفاً أو شعبة واحدة على الأقل.");
-
-    const oldRule = TEACHER_RULES.find(r => r.name === name) || {};
-    const subjectClasses = JSON.parse(JSON.stringify(oldRule.subjectClasses || {}));
-    selectedSubjects.forEach(subject => { subjectClasses[subject] = selectedClasses; });
-    const subjects = Object.keys(subjectClasses).filter(s => Array.isArray(subjectClasses[s]));
-    const ruleData = { name, subjects, classes: [...new Set(Object.values(subjectClasses).flat())], subjectClasses, maxQuota: getTeacherActualLessonCount(name) };
-    const idx = editIndex >= 0 ? editIndex : TEACHER_RULES.findIndex(r => r.name === name);
-    if (idx >= 0) TEACHER_RULES[idx] = ruleData; else TEACHER_RULES.push(ruleData);
-    if (!teachers.includes(name)) teachers.push(name);
-    saveData(); renderTeacherRulesTable(); window.clearTeacherForm();
-    alert("تم حفظ الارتباط بنجاح.");
-};
-
-window.editTeacherRule = function(index) {
-    let rule = TEACHER_RULES[index];
-    if (!rule) return;
-    window._editingRule = rule;
-    document.getElementById("editTeacherIndex").value = index;
-    let selName = document.getElementById("selectTeacherName");
-    if (teachers.includes(rule.name)) {
-        selName.value = rule.name;
-        toggleCustomTeacherInput(rule.name);
-    } else {
-        selName.value = "__custom__";
-        toggleCustomTeacherInput("__custom__");
-        document.getElementById("inputCustomTeacherName").value = rule.name;
-    }
-    renderAssignmentSubjectOptions(rule.subjects?.[0] || "");
-    window.renderLinkedClassCheckboxes();
-};
-
-window.deleteTeacherRule = function(index) {
-    if (confirm("هل أنت متأكد من حذف هذا المعلم وقواعده؟")) {
-        TEACHER_RULES.splice(index, 1);
         saveData();
         renderTeacherRulesTable();
     }
-};
-
-window.clearTeacherForm = function() {
-    document.getElementById("editTeacherIndex").value = "-1";
-    document.getElementById("selectTeacherName").value = "";
-    document.getElementById("inputCustomTeacherName").value = "";
-    document.getElementById("inputCustomTeacherName").style.display = "none";
-    window._editingRule = null;
-    renderAssignmentSubjectOptions("");
-    window.renderLinkedClassCheckboxes([]);
-};
-
-function getTeacherActualLessonCount(teacherName) {
-    const counts = calculateTeacherAllocatedQuota();
-    return Number(counts[teacherName] || 0);
 }
 
 function renderTeacherRulesTable() {
     let tbody = document.getElementById("teacherRulesTableBody");
-    document.getElementById("teacherRulesCount").innerText = TEACHER_RULES.length;
+    document.getElementById("teacherRulesCount").innerText = teachers.length;
     tbody.innerHTML = "";
-    TEACHER_RULES.forEach((rule, idx) => {
-        let subs = rule.subjects.length > 0 ? rule.subjects.join("، ") : "-";
-        let cls = rule.classes.length > 0 ? rule.classes.join("، ") : "-";
+    teachers.forEach((t, idx) => {
+        let pDays = getTeacherPatrolDaysCount(t);
         tbody.innerHTML += `<tr>
-            <td><strong>${rule.name}</strong></td>
-            <td><small>${subs}</small></td>
-            <td><small>${cls}</small></td>
-            <td><b>${getTeacherActualLessonCount(rule.name)}</b></td>
+            <td><strong>${t}</strong></td>
+            <td><b style="color:${pDays > 2 ? 'red' : 'green'}">${pDays} / 2 يوم</b></td>
             <td>
-                <button class="btn btn-notify" style="padding: 3px 8px; font-size: 11px; width: auto;" onclick="editTeacherRule(${idx})">تعديل</button>
-                <button class="btn btn-danger" style="padding: 3px 8px; font-size: 11px; width: auto;" onclick="deleteTeacherRule(${idx})">حذف</button>
+                <button class="btn btn-danger" style="padding: 3px 8px; font-size: 11px; width: auto;" onclick="deleteTeacher(${idx})">🗑️ حذف المعلم</button>
             </td>
         </tr>`;
     });
 }
 
-window.resetAllData = function() {
+function openTeachersConfigModal() {
     if (currentRole !== 'admin') return;
-    if (confirm("⚠️ هل تريد تفريغ جدول الدروس حصراً؟ لن يتم حذف أسماء المعلمين ولا الشعب.")) {
+    renderTeacherRulesTable();
+    document.getElementById("teachersConfigModal").style.display = "flex";
+}
+
+function closeTeachersConfigModal() {
+    document.getElementById("teachersConfigModal").style.display = "none";
+}
+
+// صلاحيات ودخول
+function openAuthModal() {
+    document.getElementById("authRoleSelect").value = currentRole;
+    togglePinInput();
+    document.getElementById("authModal").style.display = "flex";
+}
+
+function closeAuthModal() { document.getElementById("authModal").style.display = "none"; }
+
+function togglePinInput() {
+    const role = document.getElementById("authRoleSelect").value;
+    document.getElementById("pinGroup").style.display = (role === "admin" || role === "teacher") ? "block" : "none";
+}
+
+function processAuthLogin() {
+    const role = document.getElementById("authRoleSelect").value;
+    const pin = document.getElementById("authPinInput").value.trim();
+
+    if (role === "admin" && pin !== ADMIN_PIN) return alert("رمز المدير غير صحيح!");
+    if (role === "teacher" && pin !== TEACHER_PIN) return alert("رمز المعلم غير صحيح!");
+
+    currentRole = role;
+    localStorage.setItem("USER_ROLE_SAVED", currentRole);
+    closeAuthModal();
+    updateUIState();
+}
+
+function updateUIState() {
+    const badge = document.getElementById("roleBadge");
+    if (currentRole === "admin") {
+        badge.innerText = "المود: مدير النظام"; badge.className = "role-badge role-admin";
+        document.querySelectorAll(".admin-only").forEach(el => el.style.display = "inline-flex");
+    } else if (currentRole === "teacher") {
+        badge.innerText = "المود: معلم"; badge.className = "role-badge role-teacher";
+        document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
+    } else {
+        badge.innerText = "المود: زائر"; badge.className = "role-badge role-visitor";
+        document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
+    }
+    renderVerticalSchedule();
+    detectConflicts();
+}
+
+function resetAllData() {
+    if (currentRole !== 'admin') return;
+    if (confirm("⚠️ هل تريد تفريغ جدول الدروس والمراقبة؟")) {
         lessonsData = createEmptyLessonsStructure();
         patrolData = createEmptyPatrolStructure();
         saveData();
-        renderVerticalSchedule();
-        detectConflicts();
-        alert("تم تفريغ الجدول بنجاح.");
     }
-};
+}
 
-// بدء المزامنة وتطبيق الأحداث فور التحميل
-document.addEventListener("DOMContentLoaded", () => {
-    initData();
-});
+// توليد QR الكود أوفلاين كـ SVG
+function generateOfflineQR() {
+    const qrContainer = document.getElementById("qrCanvas");
+    qrContainer.innerHTML = `<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/></svg>`;
+}
+
+document.addEventListener("DOMContentLoaded", initData);
 </script>
 </body>
 </html>
