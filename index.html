@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
-:root { --primary-color: #1e293b; --accent-color: #2563eb; --bg-color: #f1f5f9; --border-color: #cbd5e1; --danger-color: #ef4444; --success-color: #16a34a; }
+:root { --primary-color: #0f172a; --accent-color: #2563eb; --bg-color: #f8fafc; --border-color: #cbd5e1; --danger-color: #ef4444; --success-color: #16a34a; }
 * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
 body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f172a; }
 
@@ -21,7 +21,7 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
 }
 .wall-qr-info { max-width: 75%; }
 .wall-qr-info h3 { margin: 0 0 6px 0; color: #1e3a8a; font-size: 16px; font-weight: 800; }
@@ -57,8 +57,8 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 
 /* تبويبات التنقل */
 .navigation-tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-.nav-tab { padding: 10px 20px; background-color: white; border: 1px solid var(--border-color); border-radius: 8px; font-weight: 800; font-size: 14.5px; cursor: pointer; transition: 0.2s; flex: 1 1 auto; text-align: center; }
-.nav-tab.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
+.nav-tab { padding: 10px 20px; background-color: white; border: 1px solid var(--border-color); border-radius: 8px; font-weight: 800; font-size: 14.5px; cursor: pointer; transition: 0.2s; flex: 1 1 auto; text-align: center; color: #475569; }
+.nav-tab.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
 
 /* التقارير والتضاربات */
 .report-card { background: #ffffff; border-radius: 12px; padding: 18px 22px; margin-bottom: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: none; }
@@ -73,68 +73,69 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 .conflict-panel { background-color: #fef2f2; border-right: 5px solid var(--danger-color); color: #991b1b; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: none; font-size: 14px; line-height: 1.6; box-shadow: 0 2px 6px rgba(239, 68, 68, 0.1); }
 .vertical-container { display: flex; flex-direction: column; gap: 20px; }
 
-/* التصميم والألوان لكروت الصفوف */
-.class-section-card { border-radius: 10px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08); overflow: hidden; background: #fff; }
+/* التصميم والألوان الاحترافية لكروت الصفوف وجدول المراقبة */
+.class-section-card { border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; background: #fff; }
 .table-responsive-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-.class-section-card[data-class^="الأول"] { border-top: 5px solid #0284c7; background-color: #e0f2fe; }
-.class-section-card[data-class^="الأول"] .class-header { background-color: #bae6fd; color: #0369a1; }
+.class-section-card[data-class^="الأول"] { border-top: 5px solid #0284c7; background-color: #f0f9ff; }
+.class-section-card[data-class^="الأول"] .class-header { background-color: #e0f2fe; color: #0369a1; }
 .class-section-card[data-class^="الأول"] .vertical-table th { background-color: #0284c7 !important; color: #ffffff !important; }
-.class-section-card[data-class^="الأول"] td.cell-slot { background-color: #e0f2fe !important; }
-.class-section-card[data-class^="الأول"] .day-title-col { background-color: #bae6fd !important; color: #0369a1 !important; }
+.class-section-card[data-class^="الأول"] td.cell-slot { background-color: #f0f9ff !important; }
+.class-section-card[data-class^="الأول"] .day-title-col { background-color: #e0f2fe !important; color: #0369a1 !important; }
 
-.class-section-card[data-class^="الثاني"] { border-top: 5px solid #16a34a; background-color: #dcfce7; }
-.class-section-card[data-class^="الثاني"] .class-header { background-color: #bbf7d0; color: #15803d; }
+.class-section-card[data-class^="الثاني"] { border-top: 5px solid #16a34a; background-color: #f0fdf4; }
+.class-section-card[data-class^="الثاني"] .class-header { background-color: #dcfce7; color: #15803d; }
 .class-section-card[data-class^="الثاني"] .vertical-table th { background-color: #16a34a !important; color: #ffffff !important; }
-.class-section-card[data-class^="الثاني"] td.cell-slot { background-color: #dcfce7 !important; }
-.class-section-card[data-class^="الثاني"] .day-title-col { background-color: #bbf7d0 !important; color: #15803d !important; }
+.class-section-card[data-class^="الثاني"] td.cell-slot { background-color: #f0fdf4 !important; }
+.class-section-card[data-class^="الثاني"] .day-title-col { background-color: #dcfce7 !important; color: #15803d !important; }
 
-.class-section-card[data-class^="الثالث"] { border-top: 5px solid #d97706; background-color: #fef3c7; }
-.class-section-card[data-class^="الثالث"] .class-header { background-color: #fde68a; color: #b45309; }
+.class-section-card[data-class^="الثالث"] { border-top: 5px solid #d97706; background-color: #fffbeb; }
+.class-section-card[data-class^="الثالث"] .class-header { background-color: #fef3c7; color: #b45309; }
 .class-section-card[data-class^="الثالث"] .vertical-table th { background-color: #d97706 !important; color: #ffffff !important; }
-.class-section-card[data-class^="الثالث"] td.cell-slot { background-color: #fef3c7 !important; }
-.class-section-card[data-class^="الثالث"] .day-title-col { background-color: #fde68a !important; color: #b45309 !important; }
+.class-section-card[data-class^="الثالث"] td.cell-slot { background-color: #fffbeb !important; }
+.class-section-card[data-class^="الثالث"] .day-title-col { background-color: #fef3c7 !important; color: #b45309 !important; }
 
-.class-section-card[data-class^="الرابع"] { border-top: 5px solid #9333ea; background-color: #f3e8ff; }
-.class-section-card[data-class^="الرابع"] .class-header { background-color: #e9d5ff; color: #6b21a8; }
+.class-section-card[data-class^="الرابع"] { border-top: 5px solid #9333ea; background-color: #faf5ff; }
+.class-section-card[data-class^="الرابع"] .class-header { background-color: #f3e8ff; color: #6b21a8; }
 .class-section-card[data-class^="الرابع"] .vertical-table th { background-color: #9333ea !important; color: #ffffff !important; }
-.class-section-card[data-class^="الرابع"] td.cell-slot { background-color: #f3e8ff !important; }
-.class-section-card[data-class^="الرابع"] .day-title-col { background-color: #e9d5ff !important; color: #6b21a8 !important; }
+.class-section-card[data-class^="الرابع"] td.cell-slot { background-color: #faf5ff !important; }
+.class-section-card[data-class^="الرابع"] .day-title-col { background-color: #f3e8ff !important; color: #6b21a8 !important; }
 
-.class-section-card[data-class^="الخامس"] { border-top: 5px solid #e11d48; background-color: #ffe4e6; }
-.class-section-card[data-class^="الخامس"] .class-header { background-color: #fecdd3; color: #be123c; }
+.class-section-card[data-class^="الخامس"] { border-top: 5px solid #e11d48; background-color: #fff1f2; }
+.class-section-card[data-class^="الخامس"] .class-header { background-color: #ffe4e6; color: #be123c; }
 .class-section-card[data-class^="الخامس"] .vertical-table th { background-color: #e11d48 !important; color: #ffffff !important; }
-.class-section-card[data-class^="الخامس"] td.cell-slot { background-color: #ffe4e6 !important; }
-.class-section-card[data-class^="الخامس"] .day-title-col { background-color: #fecdd3 !important; color: #be123c !important; }
+.class-section-card[data-class^="الخامس"] td.cell-slot { background-color: #fff1f2 !important; }
+.class-section-card[data-class^="الخامس"] .day-title-col { background-color: #ffe4e6 !important; color: #be123c !important; }
 
-.class-section-card[data-class^="السادس"] { border-top: 5px solid #0d9488; background-color: #ccfbf1; }
-.class-section-card[data-class^="السادس"] .class-header { background-color: #99f6e4; color: #0f766e; }
+.class-section-card[data-class^="السادس"] { border-top: 5px solid #0d9488; background-color: #f0fdfa; }
+.class-section-card[data-class^="السادس"] .class-header { background-color: #ccfbf1; color: #0f766e; }
 .class-section-card[data-class^="السادس"] .vertical-table th { background-color: #0d9488 !important; color: #ffffff !important; }
-.class-section-card[data-class^="السادس"] td.cell-slot { background-color: #ccfbf1 !important; }
-.class-section-card[data-class^="السادس"] .day-title-col { background-color: #99f6e4 !important; color: #0f766e !important; }
+.class-section-card[data-class^="السادس"] td.cell-slot { background-color: #f0fdfa !important; }
+.class-section-card[data-class^="السادس"] .day-title-col { background-color: #ccfbf1 !important; color: #0f766e !important; }
 
-.class-section-card.patrol-card { border-top: 5px solid #4f46e5; background-color: #e0e7ff; }
-.class-section-card.patrol-card .class-header { background-color: #c7d2fe; color: #3730a3; }
-.class-section-card.patrol-card .vertical-table th { background-color: #4f46e5 !important; color: #ffffff !important; }
-.class-section-card.patrol-card td.cell-slot { background-color: #e0e7ff !important; }
-.class-section-card.patrol-card .day-title-col { background-color: #c7d2fe !important; color: #3730a3 !important; }
+/* تصميم احترافي خاص بجدول مراقبة الساحة والممرات */
+.class-section-card.patrol-card { border-top: 5px solid #4f46e5; background-color: #eef2ff; }
+.class-section-card.patrol-card .class-header { background-color: #e0e7ff; color: #3730a3; }
+.class-section-card.patrol-card .vertical-table th { background-color: #4f46e5 !important; color: #ffffff !important; font-size: 13.5px !important; }
+.class-section-card.patrol-card td.cell-slot { background-color: #ffffff !important; border: 1px solid #c7d2fe !important; }
+.class-section-card.patrol-card td.cell-slot:hover { background-color: #e0e7ff !important; }
+.class-section-card.patrol-card .day-title-col { background-color: #e0e7ff !important; color: #3730a3 !important; font-size: 14.5px !important; }
 
 .class-header { padding: 12px 20px; font-size: 17px; font-weight: 800; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-.vertical-table { width: 100%; border-collapse: collapse; text-align: center; min-width: 650px; }
-.vertical-table th, .vertical-table td { border: 1px solid rgba(0, 0, 0, 0.15); padding: 10px 6px; }
-.vertical-table th { font-weight: 800; font-size: 14.5px; }
-.day-title-col { font-weight: 900; font-size: 15px; width: 100px; min-width: 90px; }
-.subject-title { font-weight: 800; font-size: 14px; margin-bottom: 2px; }
-.teacher-name { font-weight: 700; font-size: 13px; color: #1e3a8a; }
-td.cell-slot { cursor: pointer; transition: filter 0.2s ease; }
-td.cell-slot:hover { filter: brightness(0.9) !important; }
+.vertical-table { width: 100%; border-collapse: collapse; text-align: center; min-width: 750px; }
+.vertical-table th, .vertical-table td { border: 1px solid rgba(0, 0, 0, 0.12); padding: 10px 8px; }
+.vertical-table th { font-weight: 800; font-size: 14px; }
+.day-title-col { font-weight: 900; font-size: 14.5px; width: 110px; min-width: 100px; }
+.subject-title { font-weight: 800; font-size: 13.5px; margin-bottom: 2px; color: #1e293b; }
+.teacher-name { font-weight: 700; font-size: 12.5px; color: #1d4ed8; line-height: 1.4; }
+td.cell-slot { cursor: pointer; transition: all 0.2s ease; }
+td.cell-slot:hover { filter: brightness(0.95); transform: scale(1.002); }
 
 /* النوافذ المنبثقة */
-.modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 10px; }
-.modal-content { background: white; padding: 20px; border-radius: 10px; width: 550px; max-width: 100%; max-height: 90vh; overflow-y: auto; }
-.form-control { width: 100%; padding: 8px 12px; margin-top: 5px; font-weight: 700; border: 1px solid var(--border-color); border-radius: 6px; }
-.checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; max-height: 120px; overflow-y: auto; border: 1px solid #e2e8f0; padding: 8px; border-radius: 6px; }
-.checkbox-item { font-size: 12.5px; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 4px; }
+.modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 10px; }
+.modal-content { background: white; padding: 22px; border-radius: 12px; width: 550px; max-width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+.form-control { width: 100%; padding: 9px 12px; margin-top: 5px; font-weight: 700; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background-color: #f8fafc; }
+.form-control:focus { outline: none; border-color: var(--accent-color); background-color: #fff; }
 
 @media (max-width: 768px) {
   body { padding: 10px; }
@@ -157,10 +158,10 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
   .table-responsive-wrapper { width: 100% !important; overflow: visible !important; }
   .vertical-table { width: 100% !important; border-collapse: collapse !important; }
   .vertical-table th, .day-title-col, td.cell-slot { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
-  .vertical-table th { font-size: 16px !important; padding: 12px 6px !important; }
-  .vertical-table td { padding: 12px 6px !important; }
-  .subject-title { font-size: 16px !important; font-weight: bold !important; }
-  .teacher-name { font-size: 14px !important; font-weight: bold !important; }
+  .vertical-table th { font-size: 15px !important; padding: 10px 6px !important; }
+  .vertical-table td { padding: 10px 6px !important; }
+  .subject-title { font-size: 15px !important; font-weight: bold !important; }
+  .teacher-name { font-size: 13.5px !important; font-weight: bold !important; }
 }
 </style>
 </head>
@@ -189,14 +190,14 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
     <div class="btn-group">
         <button class="btn btn-manage admin-only" onclick="openTeachersConfigModal()">👨‍🏫 إدارة بيانات وقواعد المعلمين</button>
         <button class="btn btn-notify admin-only" onclick="sendGlobalNotification()">🔔 إرسال الإشعارات الشاملة</button>
-        <button class="btn btn-print" onclick="window.print()">🖨️ طباعة أفقي (كل شعبة في صفحة)</button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ طباعة أفقي (كل شعبة/جدول في صفحة)</button>
         <button class="btn btn-danger admin-only" onclick="resetAllData()">🔄 تفريغ الجدول</button>
     </div>
 </div>
 
 <div class="navigation-tabs">
     <button id="tabLessons" class="nav-tab active" onclick="switchView('lessons')">📚 جدول الدروس الأسبوعي</button>
-    <button id="tabPatrol" class="nav-tab" onclick="switchView('patrol')">🛡️ جدول مراقبة الساحة والممرات</button>
+    <button id="tabPatrol" class="nav-tab" onclick="switchView('patrol')">🛡️ جدول مراقبة الساحة والممرات (معلمان لكل موقع)</button>
 </div>
 
 <div id="adminReportCard" class="report-card">
@@ -261,11 +262,11 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
         </div>
         <div id="patrolFormGroup" style="display: none;">
             <div style="margin-bottom: 12px;">
-                <label style="font-weight: 700;">المراقب الأول:</label>
+                <label style="font-weight: 700;">🛡️ المراقب الأول:</label>
                 <select id="patrolTeacher1Select" class="form-control"></select>
             </div>
             <div style="margin-bottom: 12px;">
-                <label style="font-weight: 700;">المراقب الثاني (اختياري):</label>
+                <label style="font-weight: 700;">🛡️ المراقب الثاني:</label>
                 <select id="patrolTeacher2Select" class="form-control"></select>
             </div>
         </div>
@@ -312,12 +313,11 @@ td.cell-slot:hover { filter: brightness(0.9) !important; }
     </div>
 </div>
 
-<!-- 🔥 استدعاء مكتبة Firebase أونلاين بصيغة JS Modules الحديثة وتفعيل التحديث الآني -->
+<!-- 🔥 استدعاء مكتبة Firebase أونلاين وتفعيل التحديث الآني -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// إعدادات Firebase الخاصة بتطبيق منصة الوادي
 const firebaseConfig = {
   apiKey: "AIzaSyDopYhY0QaxB-GQdAKQXDFz0ib1mlGyNRI",
   authDomain: "alwaddy-4eee6.firebaseapp.com",
@@ -332,10 +332,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const STORAGE_LESSONS = 'SCHEDULE_LESSONS_PERMANENT_V6';
-const STORAGE_PATROL = 'SCHEDULE_PATROL_PERMANENT_V6';
-const STORAGE_RULES = 'TEACHERS_RULES_PERMANENT_V6';
-const STORAGE_CONFIG = 'SCHOOL_CONFIG_PERMANENT_V6';
+const STORAGE_LESSONS = 'SCHEDULE_LESSONS_PERMANENT_V7';
+const STORAGE_PATROL = 'SCHEDULE_PATROL_PERMANENT_V7';
+const STORAGE_RULES = 'TEACHERS_RULES_PERMANENT_V7';
+const STORAGE_CONFIG = 'SCHOOL_CONFIG_PERMANENT_V7';
 
 const ADMIN_PIN = "19801234";
 const TEACHER_PIN = "19801980";
@@ -353,7 +353,6 @@ let classes = [
     "السادس - أ", "السادس - ب"
 ];
 
-// الـ 7 أماكن المطلوبة لجدول المراقبة
 let patrolZones = [
     "الساحة - جهة الروضة", 
     "الساحة - مركز الساحة", 
@@ -364,7 +363,6 @@ let patrolZones = [
     "الممر - السفلي السادس"
 ];
 
-let allSubjects = ["التربية الإسلامية", "اللغة العربية", "اللغة الإنكليزية", "الرياضيات", "العلوم", "الاجتماعيات", "الأخلاقية", "رياضة", "فنية ونشيد"];
 let primarySubjects = ["التربية الإسلامية", "اللغة العربية", "اللغة الإنكليزية", "الرياضيات", "العلوم", "الأخلاقية", "رياضة", "فنية ونشيد"];
 let upperSubjects = ["التربية الإسلامية", "اللغة العربية", "اللغة الإنكليزية", "الرياضيات", "العلوم", "الاجتماعيات", "رياضة", "فنية ونشيد"];
 
@@ -381,9 +379,7 @@ let teachers = [
 let TEACHER_RULES = [];
 let lessonsData = {}, patrolData = {}, activeCellInfo = null;
 
-function getTeachersList() { 
-    return teachers;
-}
+function getTeachersList() { return teachers; }
 
 window.sendGlobalNotification = function() {
     if (currentRole !== 'admin') return;
@@ -498,7 +494,6 @@ function renderVerticalSchedule() {
     container.innerHTML = '';
 
     if (currentView === 'lessons') {
-        // عرض جدول الدروس كالمعتاد (لكل صف/شعبة جدول)
         classes.forEach(cls => {
             const card = document.createElement('div');
             card.className = 'class-section-card';
@@ -519,12 +514,12 @@ function renderVerticalSchedule() {
             container.appendChild(card);
         });
     } else {
-        // 🔥 جدول مراقبة الساحة والممرات: جدول واحد فقط يحتوي على الأماكن كأعمدة والأيام كصفوف
+        // جدول مراقبة الساحة والممرات مع معلمين اثنين لكل موقع
         const card = document.createElement('div');
         card.className = 'class-section-card patrol-card';
         card.dataset.class = 'المراقبة';
         
-        let html = `<div class="class-header"><span>🛡️ جدول مراقبة الساحة والممرات (معلم أو معلمان لكل مكان)</span><span>الأماكن المعتمدة (7)</span></div>`;
+        let html = `<div class="class-header"><span>🛡️️ جدول مراقبة الساحة والممرات (معلمان لكل موقع)</span><span>7 أماكن إشرافية</span></div>`;
         html += `<div class="table-responsive-wrapper"><table class="vertical-table"><thead><tr><th>اليوم</th>`;
         
         patrolZones.forEach(zone => {
@@ -537,8 +532,20 @@ function renderVerticalSchedule() {
             patrolZones.forEach(zone => {
                 const cell = patrolData?.[day]?.[zone] || { teachers: [] };
                 const showTeacher = (currentRole === 'admin' || currentRole === 'teacher');
-                const teachersDisplay = showTeacher ? (cell.teachers.length ? cell.teachers.join('<br>') : '-') : (cell.teachers.length ? 'محدد' : '-');
-                html += `<td class="cell-slot" onclick="openPatrolModal('${day}','${zone}')"><div class="teacher-name">${teachersDisplay}</div></td>`;
+                
+                let t1 = cell.teachers[0] || '';
+                let t2 = cell.teachers[1] || '';
+                
+                let displayHTML = '-';
+                if (showTeacher) {
+                    if (t1 && t2) displayHTML = `<span style="color:#1d4ed8;">1. ${t1}</span><br><span style="color:#047857;">2. ${t2}</span>`;
+                    else if (t1) displayHTML = `<span style="color:#1d4ed8;">1. ${t1}</span>`;
+                    else if (t2) displayHTML = `<span style="color:#047857;">2. ${t2}</span>`;
+                } else {
+                    displayHTML = (t1 || t2) ? 'محدد' : '-';
+                }
+
+                html += `<td class="cell-slot" onclick="openPatrolModal('${day}','${zone}')"><div class="teacher-name">${displayHTML}</div></td>`;
             });
             html += `</tr>`;
         });
@@ -692,7 +699,7 @@ window.checkTeacherConflictAndFilter = function() {
 window.openPatrolModal = function(day, zone) {
     if (currentRole !== 'admin') return;
     activeCellInfo = { type: 'patrol', day, zone };
-    document.getElementById("modalTitle").innerText = `تعديل مراقبي المكان: ${zone} - يوم ${day} (بحد أقصى معلمان)`;
+    document.getElementById("modalTitle").innerText = `تعديل مراقبي المكان: ${zone} - يوم ${day} (معلمان لكل موقع)`;
     document.getElementById("lessonFormGroup").style.display = "none";
     document.getElementById("patrolFormGroup").style.display = "block";
 
@@ -704,7 +711,7 @@ window.openPatrolModal = function(day, zone) {
     let p2 = document.getElementById("patrolTeacher2Select");
 
     p1.innerHTML = '<option value="">- اختر المراقب الأول -</option>';
-    p2.innerHTML = '<option value="">- اختر المراقب الثاني (اختياري) -</option>';
+    p2.innerHTML = '<option value="">- اختر المراقب الثاني -</option>';
 
     getTeachersList().forEach(t => {
         let opt1 = document.createElement("option"); opt1.value = t; opt1.innerText = t;
@@ -742,7 +749,7 @@ window.applyCellEdit = function() {
         let t2 = document.getElementById("patrolTeacher2Select").value;
         let list = [];
         if (t1) list.push(t1);
-        if (t2 && t2 !== t1) list.push(t2); // ضمان عدم تكرار نفس المعلم كمراقب أول وثانٍ في نفس المكان
+        if (t2) list.push(t2);
 
         if (!patrolData[day]) patrolData[day] = {};
         patrolData[day][zone] = { teachers: list };
@@ -775,7 +782,6 @@ function filterSubjectsByTeacher() {
     if ([...sel.options].some(o => o.value === current)) sel.value = current;
 }
 
-// 🔥 إصلاح زر إضافة المعلمين الجدد وحفظهم الفوري
 window.addStaffMember = function() {
     if (currentRole !== 'admin') return;
     const nameInput = document.getElementById("inputNewStaffName");
@@ -791,7 +797,6 @@ window.addStaffMember = function() {
     alert(`تم إضافة المعلم (${name}) بنجاح إلى الكادر التدريسي.`);
 };
 
-// 🔥 وظيفة حذف المعلم من الكادر
 window.deleteStaffMember = function(index) {
     if (currentRole !== 'admin') return;
     const teacherName = teachers[index];
@@ -826,7 +831,7 @@ function renderTeacherRulesTable() {
             <td><strong>${tName}</strong></td>
             <td><b>${lessonCount} حصة</b></td>
             <td>
-                <button class="btn btn-danger" style="padding: 4px 10px; font-size: 11.5px; width: auto;" onclick="deleteStaffMember(${idx})">🗑️ حذف</button>
+                <button class="btn btn-danger" style="padding: 4px 10px; font-size: 11.5px; width: auto;" onclick="deleteStaffMember(${idx})">🗑️️ حذف</button>
             </td>
         </tr>`;
     });
