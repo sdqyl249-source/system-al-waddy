@@ -113,13 +113,13 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 .class-section-card[data-class^="السادس"] td.cell-slot { background-color: #f0fdfa !important; }
 .class-section-card[data-class^="السادس"] .day-title-col { background-color: #ccfbf1 !important; color: #0f766e !important; }
 
-/* تصميم احترافي خاص بجدول مراقبة الساحة والممرات */
-.class-section-card.patrol-card { border-top: 5px solid #4f46e5; background-color: #eef2ff; }
-.class-section-card.patrol-card .class-header { background-color: #e0e7ff; color: #3730a3; }
-.class-section-card.patrol-card .vertical-table th { background-color: #4f46e5 !important; color: #ffffff !important; font-size: 13.5px !important; }
+/* تصميم احترافي وملون متعدد لتدرجات جدول مراقبة الساحة والممرات */
+.class-section-card.patrol-card { border-top: 5px solid #7c3aed; background: linear-gradient(135deg, #f5f3ff, #ede9fe); }
+.class-section-card.patrol-card .class-header { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: #ffffff; }
+.class-section-card.patrol-card .vertical-table th { background: linear-gradient(135deg, #6366f1, #4f46e5) !important; color: #ffffff !important; font-size: 13.5px !important; }
 .class-section-card.patrol-card td.cell-slot { background-color: #ffffff !important; border: 1px solid #c7d2fe !important; }
 .class-section-card.patrol-card td.cell-slot:hover { background-color: #e0e7ff !important; }
-.class-section-card.patrol-card .day-title-col { background-color: #e0e7ff !important; color: #3730a3 !important; font-size: 14.5px !important; }
+.class-section-card.patrol-card .day-title-col { background: linear-gradient(135deg, #e0e7ff, #c7d2fe) !important; color: #3730a3 !important; font-size: 14.5px !important; }
 
 .class-header { padding: 12px 20px; font-size: 17px; font-weight: 800; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
 .vertical-table { width: 100%; border-collapse: collapse; text-align: center; min-width: 750px; }
@@ -130,6 +130,31 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 .teacher-name { font-weight: 700; font-size: 12.5px; color: #1d4ed8; line-height: 1.4; }
 td.cell-slot { cursor: pointer; transition: all 0.2s ease; }
 td.cell-slot:hover { filter: brightness(0.95); transform: scale(1.002); }
+
+/* تنسيق بطاقات المعلمين الاثنين في جدول المراقبة */
+.patrol-teacher-badge-1 {
+    display: inline-block;
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 800;
+    margin-bottom: 2px;
+    width: 100%;
+}
+.patrol-teacher-badge-2 {
+    display: inline-block;
+    background-color: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 800;
+    width: 100%;
+}
 
 /* النوافذ المنبثقة */
 .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 10px; }
@@ -514,12 +539,12 @@ function renderVerticalSchedule() {
             container.appendChild(card);
         });
     } else {
-        // جدول مراقبة الساحة والممرات مع معلمين اثنين لكل موقع
+        // جدول مراقبة الساحة والممرات مع معلمين اثنين لكل موقع وتصميم ملون متعدد
         const card = document.createElement('div');
         card.className = 'class-section-card patrol-card';
         card.dataset.class = 'المراقبة';
         
-        let html = `<div class="class-header"><span>🛡️️ جدول مراقبة الساحة والممرات (معلمان لكل موقع)</span><span>7 أماكن إشرافية</span></div>`;
+        let html = `<div class="class-header"><span>🛡 جدول مراقبة الساحة والممرات (معلمان لكل موقع)</span><span>7 أماكن إشرافية</span></div>`;
         html += `<div class="table-responsive-wrapper"><table class="vertical-table"><thead><tr><th>اليوم</th>`;
         
         patrolZones.forEach(zone => {
@@ -538,14 +563,18 @@ function renderVerticalSchedule() {
                 
                 let displayHTML = '-';
                 if (showTeacher) {
-                    if (t1 && t2) displayHTML = `<span style="color:#1d4ed8;">1. ${t1}</span><br><span style="color:#047857;">2. ${t2}</span>`;
-                    else if (t1) displayHTML = `<span style="color:#1d4ed8;">1. ${t1}</span>`;
-                    else if (t2) displayHTML = `<span style="color:#047857;">2. ${t2}</span>`;
+                    if (t1 && t2) {
+                        displayHTML = `<span class="patrol-teacher-badge-1">1. ${t1}</span><span class="patrol-teacher-badge-2">2. ${t2}</span>`;
+                    } else if (t1) {
+                        displayHTML = `<span class="patrol-teacher-badge-1">1. ${t1}</span>`;
+                    } else if (t2) {
+                        displayHTML = `<span class="patrol-teacher-badge-2">2. ${t2}</span>`;
+                    }
                 } else {
-                    displayHTML = (t1 || t2) ? 'محدد' : '-';
+                    displayHTML = (t1 || t2) ? '<span style="color: #4f46e5; font-weight:800;">محدد (معلمان)</span>' : '-';
                 }
 
-                html += `<td class="cell-slot" onclick="openPatrolModal('${day}','${zone}')"><div class="teacher-name">${displayHTML}</div></td>`;
+                html += `<td class="cell-slot" onclick="openPatrolModal('${day}','${zone}')"><div>${displayHTML}</div></td>`;
             });
             html += `</tr>`;
         });
@@ -831,7 +860,7 @@ function renderTeacherRulesTable() {
             <td><strong>${tName}</strong></td>
             <td><b>${lessonCount} حصة</b></td>
             <td>
-                <button class="btn btn-danger" style="padding: 4px 10px; font-size: 11.5px; width: auto;" onclick="deleteStaffMember(${idx})">🗑️️ حذف</button>
+                <button class="btn btn-danger" style="padding: 4px 10px; font-size: 11.5px; width: auto;" onclick="deleteStaffMember(${idx})">🗑 حذف</button>
             </td>
         </tr>`;
     });
