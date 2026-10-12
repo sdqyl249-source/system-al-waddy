@@ -113,7 +113,7 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 .class-section-card[data-class^="السادس"] td.cell-slot { background-color: #f0fdfa !important; }
 .class-section-card[data-class^="السادس"] .day-title-col { background-color: #ccfbf1 !important; color: #0f766e !important; }
 
-/* تصميم احترافي وملون متعدد لتدرجات جدول مراقبة الساحة والممرات */
+/* تصميم جدول مراقبة الساحة والممرات */
 .class-section-card.patrol-card { border-top: 5px solid #7c3aed; background: linear-gradient(135deg, #f5f3ff, #ede9fe); }
 .class-section-card.patrol-card .class-header { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: #ffffff; }
 .class-section-card.patrol-card .vertical-table th { background: linear-gradient(135deg, #6366f1, #4f46e5) !important; color: #ffffff !important; font-size: 13.5px !important; }
@@ -131,7 +131,7 @@ body { margin: 0; padding: 15px; background-color: var(--bg-color); color: #0f17
 td.cell-slot { cursor: pointer; transition: all 0.2s ease; }
 td.cell-slot:hover { filter: brightness(0.95); transform: scale(1.002); }
 
-/* تنسيق بطاقات المعلمين الاثنين في جدول المراقبة */
+/* تنسيق شارات المعلمين الاثنين في جدول المراقبة */
 .patrol-teacher-badge-1 {
     display: inline-block;
     background-color: #e0f2fe;
@@ -357,10 +357,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const STORAGE_LESSONS = 'SCHEDULE_LESSONS_PERMANENT_V7';
-const STORAGE_PATROL = 'SCHEDULE_PATROL_PERMANENT_V7';
-const STORAGE_RULES = 'TEACHERS_RULES_PERMANENT_V7';
-const STORAGE_CONFIG = 'SCHOOL_CONFIG_PERMANENT_V7';
+const STORAGE_LESSONS = 'SCHEDULE_LESSONS_PERMANENT_V8';
+const STORAGE_PATROL = 'SCHEDULE_PATROL_PERMANENT_V8';
+const STORAGE_RULES = 'TEACHERS_RULES_PERMANENT_V8';
+const STORAGE_CONFIG = 'SCHOOL_CONFIG_PERMANENT_V8';
 
 const ADMIN_PIN = "19801234";
 const TEACHER_PIN = "19801980";
@@ -370,7 +370,7 @@ let currentView = 'lessons';
 
 const weekDays = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس"];
 let classes = [
-    "الأول - أ", "الأول - ب",
+    "الأول - أ", "الأول - ب", "الأول - ج",
     "الثاني - أ", "الثاني - ب", "الثاني - ج",
     "الثالث - أ", "الثالث - ب", "الثالث - ج",
     "الرابع - أ", "الرابع - ب", "الرابع - ج", "الرابع - د",
@@ -539,7 +539,6 @@ function renderVerticalSchedule() {
             container.appendChild(card);
         });
     } else {
-        // جدول مراقبة الساحة والممرات مع معلمين اثنين لكل موقع وتصميم ملون متعدد
         const card = document.createElement('div');
         card.className = 'class-section-card patrol-card';
         card.dataset.class = 'المراقبة';
