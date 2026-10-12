@@ -827,7 +827,7 @@ window.addStaffMember = function() {
 
 window.deleteStaffMember = function(index) {
     if (currentRole !== 'admin') return;
-    const teacherName = teachers[index];
+    const teacherName = teachers.classes?.[index] || teachers[index];
     if (confirm(`هل أنت متأكد من حذف المعلم (${teacherName}) من النظام؟`)) {
         teachers.splice(index, 1);
         saveData();
