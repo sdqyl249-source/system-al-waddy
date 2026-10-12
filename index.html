@@ -610,7 +610,7 @@ function initData() {
     let rData = localStorage.getItem(STORAGE_RULES);
     let cData = localStorage.getItem(STORAGE_CONFIG);
 
-    if (cData) { try { const cfg = JSON.parse(cData); if (Array.isArray(cfg.classes) && cfg.classes.length) classes = cfg.classes; if (Array.isArray(cfg.teachers) && cfg.teachers.length) teachers = cfg.teachers; } catch(e) {} }
+    if (cData) { try { const cfg = JSON.parse(cData); if (Array.isArray(cfg.classes) && cfg.classes.length) classes = [...new Set([...classes, ...cfg.classes])]; if (Array.isArray(cfg.teachers) && cfg.teachers.length) teachers = cfg.teachers; } catch(e) {} }
 
     TEACHER_RULES = rData ? JSON.parse(rData) : [];
     lessonsData = lData ? JSON.parse(lData) : createEmptyLessonsStructure();
@@ -623,7 +623,7 @@ function initData() {
             if (cloudData.lessonsData) lessonsData = cloudData.lessonsData;
             if (cloudData.patrolData) patrolData = cloudData.patrolData;
             if (cloudData.teachers) teachers = cloudData.teachers;
-            if (cloudData.classes) classes = cloudData.classes;
+            if (Array.isArray(cloudData.classes) && cloudData.classes.length) classes = [...new Set([...classes, ...cloudData.classes])];
 
             localStorage.setItem(STORAGE_LESSONS, JSON.stringify(lessonsData));
             localStorage.setItem(STORAGE_PATROL, JSON.stringify(patrolData));
@@ -883,3 +883,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
